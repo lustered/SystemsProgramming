@@ -8,56 +8,37 @@ int EXITCODEMSG() {
 }
 
 int main(int argc, char *argv[]) {
-  int def;
-
-  if (argc > 3 || atoi(argv[argc - 2]) > 3 || atoi(argv[argc - 2]) < 1) {
+  if (argc < 3 || atoi(argv[1]) > 3 || atoi(argv[1]) < 1) {
     printf("%s", "Please provide one argument int from 1-3 and a string.\n");
     exit(1);
-  } else if (argc == 0)
-    def = 5;
-  else
-    def = atoi(argv[argc - 1]);
+  } 
 
-  for (int i = 0; i < def; ++i) {
-    /* Required variables */
-    char ch;
-    char phrase[50];
-    int num;
+  /* Required variables */
+  int num = atoi(argv[1]);
+  char initial;
+  char *sentence = malloc(num + 1);
 
-    char *pphrase;
-    char *pch;
-    int *pnum;
+  /* Define pointers */
+  int *pNum;
+  char *pInit;
+  char *pSentence;
 
-    printf("Enter a phrase: ");
-    if (scanf(" %[^\n]", phrase) != 1)
-      exit(EXITCODEMSG());
+  char space[] = " ";
+  /* Get the sentence */
+  for (int i = 2, j = 0; i < argc; i++, ++j)
+    strcat(strcat(sentence, argv[i]), space);
 
-    printf("Enter a single character: ");
-    if (scanf(" %c", &ch) != 1)
-      exit(EXITCODEMSG());
+  /* Assign the initial character */ 
+  initial = sentence[0];
 
-    printf("Enter a single integer: ");
-    if (scanf(" %d", &num) != 1)
-      exit(EXITCODEMSG());
+  pNum = &num;
+  pInit = &initial;
+  pSentence = sentence;
 
-    printf("\n********* Uninitialized Pointers ***********\n");
-    printf("Single character: %p\nInteger: %p\nPhrase: %p\nFloat: %p\n", pch,
-           pnum, pphrase, pnum);
+  /* printf("Sentence: %s\n", sentence); */
+  /* printf("Initial: %c\n", initial); */
 
-    /* Point the pointers to variables */
-    pphrase = phrase;
-    pch = &ch;
-    pnum = &num;
-
-    printf("\n********* After initialization ***********\n");
-    printf("Single character: %c\nInteger: %d\nPhrase: %s\n", *pch, *pnum,
-           pphrase);
-
-    printf("\n********* Addresses ***********\n");
-    printf("Single character: %p\nInteger: %p\nPhrase: "
-           "%p\n\n***************************\n",
-           &pch, &pnum, &pphrase);
-  }
+  printf("Number: %d\nInitial: %c\nSentence: %s\n", *pNum, *pInit, pSentence);
 
   return 0;
 }
