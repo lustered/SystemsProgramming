@@ -2,12 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-int EXITCODEMSG() {
-  printf("%s", "Please provide one argument int from 1-3 and an equal amount "
-               "of strings.\n");
-  return 1;
-}
-
 int main(int argc, char *argv[]) {
 
   /* All the checks:
@@ -16,8 +10,11 @@ int main(int argc, char *argv[]) {
    * The amount of string args passed matches the int
    * */
   if (argc < 3 || atoi(argv[1]) < 1 || atoi(argv[1]) > 3 ||
-      atoi(argv[1]) > 1 && argc - 2 != atoi(argv[1]))
-    exit(EXITCODEMSG());
+      atoi(argv[1]) > 1 && argc - 2 != atoi(argv[1])) {
+    printf("\nPlease provide one argument int from 1-3 and an equal amount "
+           "of strings.\n");
+    exit(1);
+  }
 
   /* Required variables */
   int num = atoi(argv[1]);
