@@ -52,7 +52,11 @@ int main(int argc, char *argv[]) {
   pSentence = sentence;
 
   /* Print all the data */
-  printPointers(pSentence, pNum, pInit);
+  int i = 0;
+  while (*pNum) {
+    *pInit = pSentence[i][0];
+    printPointers(pSentence[i++], pNum, pInit);
+  }
 
   return 0;
 }
