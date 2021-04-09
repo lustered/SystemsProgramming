@@ -1,11 +1,6 @@
-#include <string.h>
-
-int func(char* string, int* num, char* c)
-{
-   printf("Character: %c\n", *c);
-   printf("Integer: %d\n", *num);
-   printf("String: %s\n", string);
-
-   (*num)--;
-   return *num;
+#include <stdio.h>
+void printPointers(char **sentence, int *num, char *c) {
+  for (; *num != 0; (*num)--)
+    printf("\nNumber: %d\nInitial: %c\nSentence: %s\n", *num,
+           sentence[*num - 1][0], sentence[*num - 1]);
 }
