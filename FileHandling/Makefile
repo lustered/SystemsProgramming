@@ -1,5 +1,5 @@
-all: writer updater reader run1 run2 run3 run4 run5 urun1 urun2 urun3 urun4 \
-	urun5 urun6 urun7 rrun1 rrun2 rrun3
+all: writer run1 run2 run3 run4 run5 updater urun1 urun2 urun3 urun4 \
+	urun5 urun6 urun7 reader rrun1 rrun2 rrun3
 
 writer: filehandling.c
 	@printf "\n\n******************** First Program ********************\n"
