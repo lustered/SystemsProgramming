@@ -2,11 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-int EXITCODEMSG() {
-  printf("Please make sure you're entering the proper values.\n");
-  return 1;
-}
-
 struct info {
   char ch;
   char *stringp;
@@ -34,7 +29,7 @@ void getInfo(info *ptr) {
     /* Allocate 30 chars size to the string */
     ptr[i].stringp = (char *)malloc(sizeof(char) * 30);
 
-    printf("Enter a string: ");
+    printf("\nEnter a string: ");
     scanf(" %[^\n]", ptr[i].stringp);
 
     printf("Enter a single character: ");

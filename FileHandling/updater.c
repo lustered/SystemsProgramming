@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if(argc - optind != 5){
+  if (argc - optind != 5) {
     printf("\nMake sure your argument string is 5 words long.\n");
     printf("Usage: [-f filename] text-to-write\n");
     exit(1);
@@ -41,10 +41,8 @@ int main(int argc, char *argv[]) {
     fprintf(f, "%s\n", text);
     fflush(f);
     fclose(f);
-  }
-  else{ // Else, throw an error
+  } else { // Else, throw an error
     printf("\nYou need to provide a file name.\n");
     exit(1);
   }
-
 }
