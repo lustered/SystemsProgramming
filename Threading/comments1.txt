@@ -1,0 +1,36 @@
+Comments:
+Thread IDs are most likely always different and depend on the system and operating 
+system that are being run on. Once a thread is spawned and ran you need to join(wait)
+all threads if you want to execute something depending on the outcome of all the threads as 
+it's likely they're still running in the background. If all threads are not waited on then 
+the program will proceed and finish before all threads are done.
+
+The final result may not be accurate depending on the timings of each thread 
+adding its tid to the shared value. This can be observed if we print the shared value
+inside the thread function, and observe that it does not keep track of the proper order.
+
+
+Output example:
+1:
+Thread ID: 139741696038464
+The value for the shared number is: 562889154948756
+Thread ID: 139741670860352
+The value for the shared number is: 703611443685940
+Thread ID: 139741704431168
+The value for the shared number is: 703611443685940
+Thread ID: 139741687645760
+The value for the shared number is: 703611443685940
+Thread ID: 139741679253056
+The value for the shared number is: 703611443685940
+
+2:
+Thread ID: 140487294047808
+The value for the shared number is: 281458986698444
+Thread ID: 140487277262400
+The value for the shared number is: 422188480047628
+Thread ID: 140487285655104
+The value for the shared number is: 422188480047628
+Thread ID: 140487268869696
+The value for the shared number is: 562917973396820
+Thread ID: 140487260476992
+The value for the shared number is: 703647466746020

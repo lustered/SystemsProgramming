@@ -1,0 +1,31 @@
+When adding a mutex to the threads, we can control which thread will modify 
+the shared value one at a time. As in the first program, printing the shared value
+inside the thread function allows us to see an organized increment. 
+
+All threads have to be joined to have a consistent outcome, otherwise, like 
+in program one as well, the program could finish before all threads are executed.
+
+Outputs:
+1:
+Thread ID: 139708201711168
+The value for the shared number is: 100
+Thread ID: 139708193318464
+The value for the shared number is: 139708201711268
+Thread ID: 139708038379072
+The value for the shared number is: 279416395029732
+Thread ID: 139708184925760
+The value for the shared number is: 419124433408804
+Thread ID: 139708176533056
+The value for the shared number is: 558832618334564
+
+2:
+Thread ID: 140646427330112
+The value for the shared number is: 100
+Thread ID: 140646410544704
+The value for the shared number is: 140646427330212
+Thread ID: 140646418937408
+The value for the shared number is: 281292837874916
+Thread ID: 140646402152000
+The value for the shared number is: 421939256812324
+Thread ID: 140646393759296
+The value for the shared number is: 562585658964324
