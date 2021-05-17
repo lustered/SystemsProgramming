@@ -4,6 +4,11 @@
  * I affirm that I wrote this program myself without any help from any other
  * people or sources from the internet.
  */
+
+/* This program converts miles to kilometers, and displays the results in a
+ * chart-like form.
+ */
+
 #include <stdio.h>
 
 #define N_PARAMS 4 // Number of miles elements.
