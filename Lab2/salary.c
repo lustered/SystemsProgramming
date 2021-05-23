@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Display salary.
-  printf("Salary: %.2f\n", (double)base);
+  printf("Salary: %.2lf\n", (double)base);
 
   return 0;
 }
