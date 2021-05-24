@@ -29,7 +29,8 @@ int main(int argc, char *argv[]) {
   bool copt = false;
 
   // Number of words or substrings in the file.
-  int count = 0;
+  int literalCount = 0;
+  int substringCount = 0;
 
   char filename[ARGBUFSIZE];
   char substring[ARGBUFSIZE];
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]) {
       break;
     // Mark substring flag.
     case 's':
-      strcpy(substring, argv[optind-1]);
+      strcpy(substring, argv[optind - 1]);
       // for (int i = optind - 1; i < argc - 1; i++)
       //   strcat(strcat(substring, argv[i]), " ");
       break;
@@ -60,19 +61,22 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // Create a pointer to a file.
   FILE *fileob = fopen(filename, "r");
+  // String to store each line from the file
   char line[FILEBUFSIZE];
+
   if (fileob)
     while (fgets(line, FILEBUFSIZE, fileob) != NULL) {
       char *word = strtok(line, *delimeters);
       // Split words.
       while (word != NULL) {
-        // printf("Word: %s\n", word);
         // Check for equal strings
-        if(strcmp(word, substring) == 0){
-          count++;
-          printf("\nWord matched: %s\n", word);
-        }
+        if (strcmp(word, substring) == 0)
+          literalCount++;
+        if(strstr(word ,substring))
+          substringCount++;
+
 
         word = strtok(NULL, *delimeters);
       }
@@ -86,7 +90,7 @@ int main(int argc, char *argv[]) {
   // strtok(line, "\n");
 
   // printf("Name: %s\n", filename);
-  printf("Substring: %s\n", substring);
+  // printf("Substring: %s\n", substring);
 
   // for(int i = 0; i < strlen(line); i++)
   // {
@@ -94,7 +98,8 @@ int main(int argc, char *argv[]) {
   // }
 
   // printf("word: %s", &line[3]);
-  printf("Count: %d", count);
+  printf("Literal matches count: %d\n", literalCount);
+  printf("Substring matches count: %d\n", substringCount);
 
   return 0;
 }

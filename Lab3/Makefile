@@ -4,6 +4,6 @@ salary: mywords.c
 	cc mywords.c -o mywords 
 t1: 
 	- @printf "\nTest 1: Pass\n"
-	- ./mywords -c -s you filenametest
+	- ./mywords -c -s loo filenametest
 clean:
 	- rm mywords
