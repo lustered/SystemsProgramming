@@ -5,7 +5,7 @@
  * people or sources from the internet.
  */
 
-/* This program counts the number of words or substrings in a file.
+/* This program counts the number of words and/or substrings in a file.
  * Usage: mywords [-c] [-s substring] filename
  */
 
@@ -15,13 +15,11 @@
 #include <string.h>
 #include <unistd.h>
 
-// Size of the text in the file
-#define FILEBUFSIZE 1000
-// Size of the text for the file name and substring
-#define ARGBUFSIZE 200
+#define FILEBUFSIZE 1000 // Size allowed for each line.
+#define ARGBUFSIZE 200   // Size of the text for the file name and substring
 
 // Set delimeters to split the text file's line into words.
-const char *delimeters[1] = {"\"\n'.,!/ "};
+const char *delimeters[] = {"\"\n.,!/ "};
 
 int main(int argc, char *argv[]) {
   int opt;
@@ -29,9 +27,10 @@ int main(int argc, char *argv[]) {
   bool copt = false;
 
   // Number of words or substrings in the file.
-  int literalCount = 0;
+  int wordCount = 0;
   int substringCount = 0;
 
+  // Declare strings for the file and substring.
   char filename[ARGBUFSIZE];
   char substring[ARGBUFSIZE];
 
@@ -49,8 +48,6 @@ int main(int argc, char *argv[]) {
     // Mark substring flag.
     case 's':
       strcpy(substring, argv[optind - 1]);
-      // for (int i = optind - 1; i < argc - 1; i++)
-      //   strcat(strcat(substring, argv[i]), " ");
       break;
     default:
       // Default usage.
@@ -61,44 +58,43 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // Create a pointer to a file.
-  FILE *fileob = fopen(filename, "r");
-  // String to store each line from the file
-  char line[FILEBUFSIZE];
+  if (access(filename, F_OK) == 0) {
+    // Create a pointer to a file.
+    FILE *fileob = fopen(filename, "r");
+    // String to store each line from the file
+    char line[FILEBUFSIZE];
 
-  if (fileob)
+    // Iterate over every line in the file
     while (fgets(line, FILEBUFSIZE, fileob) != NULL) {
+      // Extract word given the delimeters.
       char *word = strtok(line, *delimeters);
-      // Split words.
+
+      // Count words
       while (word != NULL) {
-        // Check for equal strings
-        if (strcmp(word, substring) == 0)
-          literalCount++;
-        if(strstr(word ,substring))
+        // printf("Word: %s\n", word);
+
+        // Increase word count.
+        wordCount++;
+
+        // Check for substring.
+        if (strstr(word, substring))
           substringCount++;
 
-
+        // Move onto the next word.
         word = strtok(NULL, *delimeters);
-      }
-    }
+
+      } // end while
+    }   // end while
+  }     // end if
   else {
     printf("The file you have specified does not exist.\n");
     exit(1);
   }
 
-  // Remove trailing newline added by fgets.
-  // strtok(line, "\n");
-
-  // printf("Name: %s\n", filename);
-  // printf("Substring: %s\n", substring);
-
-  // for(int i = 0; i < strlen(line); i++)
-  // {
-  // printf("%s", &line[0]);
-  // }
-
-  // printf("word: %s", &line[3]);
-  printf("Literal matches count: %d\n", literalCount);
+  // Display information.
+  printf("File name: %s\n", filename);
+  printf("Substring: %s\n", substring);
+  printf("Words count: %d\n", wordCount);
   printf("Substring matches count: %d\n", substringCount);
 
   return 0;
