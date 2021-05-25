@@ -14,8 +14,7 @@
 int main() {
 
   unsigned int userNum = 0;
-  unsigned int tmp = 0;
-  int pos = 0;
+  int flip = 0;
 
   do {
     printf("Please enter a number between 1-100: ");
@@ -25,10 +24,10 @@ int main() {
 
   do {
     printf("Please enter the bit to flip between 0 and 31: ");
-    scanf("%d", &pos);
-  } while (pos < 0 || pos > 31);
+    scanf("%d", &flip);
+  } while (flip < 0 || flip > 31);
 
-  printf("New value: %u\n", userNum ^ pos);
+  printf("New value: %u\n", userNum ^ flip);
 
   return 0;
 }
