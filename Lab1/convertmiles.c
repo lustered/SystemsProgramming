@@ -24,7 +24,7 @@ int main() {
   // Iterate over all the miles to convert.
   for (int i = 0; i < N_PARAMS; ++i)
     // Formatted values: justified right, 5 decimal places.
-    printf("|% 15.5f| % 11.5f|\n", miles[i], miles[i] * 1.60934);
+    printf("|% 15.5lf| % 11.5lf|\n", miles[i], miles[i] * 1.60934);
 
   return 0;
 }
