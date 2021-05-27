@@ -1,4 +1,4 @@
-COMPILER = gcc
+CC = gcc
 CFLAGS = -Wall
 
 test: run
