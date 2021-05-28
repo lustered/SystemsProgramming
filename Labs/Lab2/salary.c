@@ -26,10 +26,7 @@ int main(int argc, char *argv[]) {
   int opt;
 
   // Declare variables
-  int base = 0;
-  int bopt = 0;
-  int ropt = 0;
-  int vopt = 0;
+  int base = 0, bopt = 0, ropt = 0, vopt = 0;
 
   // Check if the base is within limit.
   if (atoi(argv[argc - 1]) < 20000 || atoi(argv[argc - 1]) > 60000)
@@ -78,25 +75,16 @@ int main(int argc, char *argv[]) {
   }
 
   // Apply veteran bonus if v flag was passed.
-  if (vopt) {
-    base += 5000;
-    printf("Veteran: +5000\n");
-  }
+  base += (vopt) ? 5000 : 0;
 
   // Apply percentage if r flag was passed.
-  if (ropt != 0) {
-    printf("Percentage: +%d%%\n", ropt);
-    base += base * (ropt / 100.0);
-  }
+  base += (ropt) ? base * (ropt / 100.0) : 0;
 
   // Apply bonus if b flag was passed.
-  if (bopt) {
-    printf("Bump: %d\n", bopt);
-    base += bopt;
-  }
+  base += (bopt) ? bopt : 0;
 
   // Display salary.
-  printf("Salary: %.2lf\n", (double)base);
+  printf("Salary: $%.2lf\n", (double)base);
 
   return 0;
 }
