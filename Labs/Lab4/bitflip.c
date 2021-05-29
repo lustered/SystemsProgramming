@@ -14,9 +14,11 @@
 
 int main() {
 
+  // Declare and initialize variables
   uint32_t userNum = 0;
   int nth = 0;
 
+  // Get user input
   do {
     printf("Please enter a number between 1-1000: ");
     scanf("%u", &userNum);
@@ -28,13 +30,18 @@ int main() {
     scanf("%d", &nth);
   } while (nth < 0 || nth > 31);
 
-  // Breakdown:
-  // (1 << nth position {2} ) 32 bit: 000001 << 2 = 000100 (4)
-  //    001010 (10) userNum
-  // xor
-  //    000100 (4) 1 << nth
-  //    ------
-  //    001110 (14)
+  /*
+   * Breakdown:
+   * (1 << nth position {2} ): 000001 (1) << 2 = 000100 (4)
+   *
+   * We apply bitwise xor:
+   *
+   *    001010 (10) userNum
+   * xor
+   *    000100 (4) 1 << nth
+   *    ------
+   *    001110 (14)
+   */
   printf("New value: %u\n", userNum ^ (1 << nth));
 
   return 0;
