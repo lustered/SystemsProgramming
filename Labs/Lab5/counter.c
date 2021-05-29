@@ -14,67 +14,59 @@
 #define FD_WRITE 1
 
 int main() {
+  int pipe_A[2], pipe_B[2];
   pid_t pid;
-  int fd[2];
-  int sfd[2];
-  int status = 0;
 
-  static char *commands[2][2] = {{"sort", "Makefile"}, {"grep", "main"}};
+  static char *commands[3][3] = {{"/bin/sort", "sort", "counter.c"},
+                                 {"/usr/bin/grep", "grep", "main"},
+                                 {"/usr/bin/wc", "wc", ""}};
 
-  pipe(fd);
+  pipe(pipe_A);
 
-  for (int i = 0; i < 3; ++i) {
-    if ((pid = fork()) == 0) {
-      // TESTING
-      // Sort
-      if(i == 0){
-        close(fd[FD_READ]); // Don't need to read
-        dup2(fd[FD_WRITE], 1); // Write to fd
-        close(fd[FD_WRITE]); // Close
-      }
+  if ((pid = fork()) == 0) {
+    close(pipe_A[FD_READ]); // A-read not needed here
 
-      // Grep
-      if(i == 1){
-        pipe(sfd);
+    dup2(pipe_A[FD_WRITE], FD_WRITE);
+    close(pipe_A[FD_WRITE]); // do not pass A-write twice
 
-        close(sfd[FD_WRITE]);
-        close(0);
-        dup2(fd[FD_READ], 1);
-        close(fd[FD_READ]);
-      }
+    execlp(commands[0][0], commands[0][1], commands[0][2], NULL);
 
-      // Execution code
-      // execlp("sort", "sort", "counter.c", NULL);
-      if (i == 2)
-        execlp("wc", "wc", NULL);
-      else
-        execlp(commands[i][0], commands[i][0], commands[i][1], NULL);
-      printf("testing\n");
-
-      exit(0);
-    }
-    else if (pid == -1) {
-      perror("fork failed");
-      exit(-1);
-    } 
-    else if (pid > 0) {
-      waitpid(pid, &status, 0);
-      close(fd[FD_WRITE]);
-
-      char readbuffer[1024];
-      while (read(fd[0], readbuffer, sizeof(readbuffer) != 0))
-        printf("%s", readbuffer);
-
-      close(fd[FD_READ]);
-
-      printf("CHILD #:%d || ID: [%d] DONE.\n", i+1, pid);
-    }
+    exit(0);
   }
 
-  // char readbuffer[1024];
-  // while (read(fd[0], readbuffer, sizeof(readbuffer) != 0)) {
-  //   printf("%s", readbuffer);
-  // }
+  close(pipe_A[FD_WRITE]); // A-write not needed anymore
+
+  pipe(pipe_B); // do not create this pipe until needed
+
+  if ((pid = fork()) == 0) {
+    close(pipe_B[FD_READ]); // B-read not needed here
+
+    dup2(pipe_A[FD_READ], FD_READ);
+    close(pipe_A[FD_READ]); // do not pass A-read twice
+
+    dup2(pipe_B[FD_WRITE], FD_WRITE);
+    close(pipe_B[FD_WRITE]); // do not pass B-write twice
+
+    execlp(commands[1][0], commands[1][1], commands[1][2], NULL);
+
+    exit(0);
+  }
+
+  close(pipe_A[FD_READ]);
+  close(pipe_B[FD_WRITE]);
+
+  if ((pid = fork()) == 0) {
+
+    dup2(pipe_B[FD_READ], FD_READ);
+    close(pipe_B[FD_READ]); // do not pass B-read twice
+
+    execlp(commands[2][0], commands[2][1], NULL);
+
+    exit(0);
+  }
+
+  // Don't need to read from B anymore
+  close(pipe_B[FD_READ]);
 
   return 0;
 }
