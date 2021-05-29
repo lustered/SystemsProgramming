@@ -14,59 +14,44 @@
 #define FD_WRITE 1
 
 int main() {
-  int pipe_A[2], pipe_B[2];
+  int sortPipe[2], grepPipe[2];
   pid_t pid;
 
   static char *commands[3][3] = {{"/bin/sort", "sort", "counter.c"},
                                  {"/usr/bin/grep", "grep", "main"},
                                  {"/usr/bin/wc", "wc", ""}};
 
-  pipe(pipe_A);
+  pipe(sortPipe);
+  pipe(grepPipe);
 
   if ((pid = fork()) == 0) {
-    close(pipe_A[FD_READ]); // A-read not needed here
-
-    dup2(pipe_A[FD_WRITE], FD_WRITE);
-    close(pipe_A[FD_WRITE]); // do not pass A-write twice
+    dup2(sortPipe[FD_WRITE], FD_WRITE);
 
     execlp(commands[0][0], commands[0][1], commands[0][2], NULL);
 
     exit(0);
   }
 
-  close(pipe_A[FD_WRITE]); // A-write not needed anymore
-
-  pipe(pipe_B); // do not create this pipe until needed
+  // Close sort's write
+  close(sortPipe[FD_WRITE]);
 
   if ((pid = fork()) == 0) {
-    close(pipe_B[FD_READ]); // B-read not needed here
-
-    dup2(pipe_A[FD_READ], FD_READ);
-    close(pipe_A[FD_READ]); // do not pass A-read twice
-
-    dup2(pipe_B[FD_WRITE], FD_WRITE);
-    close(pipe_B[FD_WRITE]); // do not pass B-write twice
+    dup2(sortPipe[FD_READ], FD_READ);
+    dup2(grepPipe[FD_WRITE], FD_WRITE);
 
     execlp(commands[1][0], commands[1][1], commands[1][2], NULL);
 
     exit(0);
   }
 
-  close(pipe_A[FD_READ]);
-  close(pipe_B[FD_WRITE]);
+  close(sortPipe[FD_READ]);
+  close(grepPipe[FD_WRITE]);
 
   if ((pid = fork()) == 0) {
-
-    dup2(pipe_B[FD_READ], FD_READ);
-    close(pipe_B[FD_READ]); // do not pass B-read twice
-
+    dup2(grepPipe[FD_READ], FD_READ);
     execlp(commands[2][0], commands[2][1], NULL);
-
     exit(0);
   }
-
-  // Don't need to read from B anymore
-  close(pipe_B[FD_READ]);
 
   return 0;
 }
