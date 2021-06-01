@@ -1,29 +1,36 @@
+/* NOTES:
+ * Need to assign left/right nodes
+ */
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <unistdio.h>
 
-#define BUFSIZE 1000
+#define BUFSIZE 100
 
-typedef struct {
+typedef struct node {
   char *info;
   struct node *left;
   struct node *right;
 } node;
 
-typedef struct tree {
-  node *words;
-  // node *head;
-  int pos;
-} tree;
-
 node *createNode(char *info) {
-  node *n = (node *)malloc(sizeof(node));
-  n->info = info;
-  n->right = NULL;
-  n->left = NULL;
+  node *ret = (node *)malloc(sizeof(node));
+  ret->info = info;
+  ret->right = NULL;
+  ret->left = NULL;
 
-  return n;
+  return ret;
+}
+
+char *strLower(char *string) {
+  for (char *i = string; *i; i++)
+    *i = tolower(*i);
+
+  return string;
 }
 
 int _scmpSensitive(char *string1, char *string2) {
@@ -60,77 +67,75 @@ int _scmpInsensitive(char *string1, char *string2) {
   return c1 - c2;
 }
 
-void inorderTraversal(tree *bst, node *n, char *info) {
+void inorderTraversal(node *n) {
   if (n == NULL)
     return;
-  inorderTraversal(bst, (node *)n->left, info);
-  printf("%s", n->info);
-  inorderTraversal(bst, (node *)n->right, info);
+  inorderTraversal((node *)n->left);
+  printf("[NODE]%s\n", n->info);
+  inorderTraversal((node *)n->right);
 }
 
-// TODO TODO
-// void orderNodes(node *n, char *info){
-
-//   // Equals case: Don't add anything
-//   if (_scmpInsensitive(n->info, info) == 0)
-//     return;
-//   else if (_scmpInsensitive(n->info, info) > 0) { // Node's value is greater
-//     char* tmp = n->info;
-//     n->info = info;
-
-
-//   } else // Node value is smaller
-//     ;
-// }
-
-// void insertNodeList(tree *bst, char *info) {
-void insertNodeList(node *n, char *info) {
-  if (n->info == NULL) {
-    n->info = info;
-    return;
+node *insertNode(node *head, char *info) {
+  if (head == NULL) {
+    // printf("Added node\n");
+    return createNode(info);
   }
 
-  insertNodeList((node*) n->left, info);
-  insertNodeList((node*) n->right, info);
+  if (_scmpSensitive(head->info, info) == 0) {
+    printf("[**REPEATED KEY**] [%s || %s]\n", head->info, info);
+    return head;
+  } // Node's value is greater
+  else if (_scmpSensitive(head->info, info) < 0) {
+    // We want to go to the left side of the tree (smaller values)
+    // printf("[GOING LEFT] 1: %s || 2: %s\n", head->info, info);
+    head->left = insertNode(head->left, info);
+  } else {
+    // printf("[GOING RIGHT] 1: %s || 2: %s\n", head->info, info);
+    head->right = insertNode(head->right, info);
+  }
+
+  return head;
 }
 
-void insertNodeArray(char *info, tree *bst) {
-  bst->words[bst->pos] = *createNode(info);
-  bst->pos++;
-}
+int main(int argc, char *argv[]) {
+  int opt, caseFlag = 0, outputFlag = 0, inputFlag = 0;
+  char infileName[BUFSIZE];
+  char outfileName[BUFSIZE];
 
-int main() {
-  // DEBUG
-  // *************************************************
-  tree abc;
-  abc.words = (node *)malloc(sizeof(node) * BUFSIZE);
+  char wordsList[BUFSIZE][BUFSIZE];
 
-  // Linked list implementation
-  for(int i = 0; i < 50; i++)
-    insertNodeList(node *n, char *info)
+  while ((opt = getopt(argc, argv, "co:")) != -1) {
+    // Check param.
+    switch (opt) {
+    case 'c':
+      caseFlag = 1;
+      break;
+    case 'o':
+      outputFlag = 1;
+      strcpy(infileName, optarg);
+    default:
+      break;
+    }
+  }
 
-  // !!!!!!!!!! Array implementation !!!!!!!!!
-  // abc.pos = 0;
-  // for (int i = 0; i < 50; i++)
-  //   insertNodeArray("askjdhaskjdh", &abc);
+  if (argc > optind)
+    strcpy(outfileName, argv[argc - 1]);
 
-  // for (int i = 0; i < abc.pos; i++)
-  //   printf("Node[%d] || info:%s\n", i,abc.words[i].info);
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  char word[BUFSIZE];
 
-  // Free up memory in the heap *********
-  // for (int i = 0; i < BUFSIZE; i++) {
-  //   free(abc.words[i].left);
-  //   free(abc.words[i].right);
-  // }
-  // free(abc.words);
+  node *head = createNode("sure");
 
-  // String compare testing
-  // char* s1 = "qwer";
-  // char* s2 = "abc";
-  // printf("Testing: %d", _scmpInsensitive(s1, s2));
 
-  // *************************************************
+  if (inputFlag == 0) {
+    int i = 0;
+    while (fgets(word, BUFSIZE, stdin) != NULL && word[0] != '\n') {
+      strcpy(wordsList[i++], strtok(word, "\n \0"));
+      insertNode(head, strLower(wordsList[i]));
+    }
+  }
+
+  inorderTraversal(head);
+
 
   return 0;
 }

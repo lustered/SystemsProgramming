@@ -7,6 +7,7 @@ bstsort: bst.c
 	$(CC) $(CFLAGS) bst.c -o bst
 
 run: bst
-	./bst
+	./bst -o someoutfile.txt
+
 clean:
 	- rm  bst
