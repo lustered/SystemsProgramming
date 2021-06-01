@@ -1,5 +1,12 @@
-/* NOTES:
- * Need to assign left/right nodes
+/* Name: Carlos Luis
+ * Panther ID: 6271656
+ *
+ * I affirm that I wrote this program myself without any help from any other
+ * people or sources from the internet.
+ */
+
+/* This program will create, insert and sort words in a binary search tree.
+ * Usage: bstsort [-c] [-o output_file_name] [input_file_name]
  */
 
 #include <ctype.h>
@@ -11,14 +18,15 @@
 
 #define BUFSIZE 100
 
-typedef struct node {
+typedef struct Node {
   char *info;
-  struct node *left;
-  struct node *right;
-} node;
+  struct Node *left;
+  struct Node *right;
+} Node;
 
-node *createNode(char *info) {
-  node *ret = (node *)malloc(sizeof(node));
+// Create a node by initializing its key and next values
+Node *createNode(char *info) {
+  Node *ret = (Node *)malloc(sizeof(Node));
   ret->info = info;
   ret->right = NULL;
   ret->left = NULL;
@@ -26,13 +34,17 @@ node *createNode(char *info) {
   return ret;
 }
 
+// Convert entire string lowercase
 char *strLower(char *string) {
+  // Iterate over every char
   for (char *i = string; *i; i++)
+    // Make each char lowercase
     *i = tolower(*i);
 
   return string;
 }
 
+// Compare strings as case sensitive
 int _scmpSensitive(char *string1, char *string2) {
 
   unsigned char *s1 = (unsigned char *)string1;
@@ -50,42 +62,27 @@ int _scmpSensitive(char *string1, char *string2) {
   return c1 - c2;
 }
 
-int _scmpInsensitive(char *string1, char *string2) {
-
-  unsigned char *s1 = (unsigned char *)(string1);
-  unsigned char *s2 = (unsigned char *)(string2);
-
-  unsigned char c1, c2;
-
-  do {
-    c1 = (unsigned char)tolower(*s1++);
-    c2 = (unsigned char)tolower(*s2++);
-    if (c1 == '\0')
-      return c1 - c2;
-  } while (c1 == c2);
-
-  return c1 - c2;
-}
-
-void inorderTraversal(node *n) {
-  if (n == NULL)
+// Print each node in an in-order traversal fashion
+void inorderTraversal(Node *node) {
+  // If the node is NULL, we either reached the end of the list or the root was
+  // null
+  if (node == NULL)
     return;
-  inorderTraversal((node *)n->left);
-  printf("[NODE]%s\n", n->info);
-  inorderTraversal((node *)n->right);
+
+  inorderTraversal((Node *)node->left);
+  printf("[NODE]%s\n", node->info);
+  inorderTraversal((Node *)node->right);
 }
 
-node *insertNode(node *head, char *info) {
-  if (head == NULL) {
-    // printf("Added node\n");
+Node *insertNode(Node *head, char *info) {
+  if (head == NULL)
     return createNode(info);
-  }
 
   if (_scmpSensitive(head->info, info) == 0) {
     printf("[**REPEATED KEY**] [%s || %s]\n", head->info, info);
     return head;
   } // Node's value is greater
-  else if (_scmpSensitive(head->info, info) < 0) {
+  else if (_scmpSensitive(head->info, info) > 0) {
     // We want to go to the left side of the tree (smaller values)
     // printf("[GOING LEFT] 1: %s || 2: %s\n", head->info, info);
     head->left = insertNode(head->left, info);
@@ -112,30 +109,35 @@ int main(int argc, char *argv[]) {
       break;
     case 'o':
       outputFlag = 1;
-      strcpy(infileName, optarg);
+      strcpy(outfileName, optarg);
     default:
       break;
     }
   }
 
+  // Grab input file
   if (argc > optind)
-    strcpy(outfileName, argv[argc - 1]);
+    strcpy(infileName, argv[argc - 1]);
 
   char word[BUFSIZE];
 
-  node *head = createNode("sure");
-
+  Node *head = createNode("Something");
 
   if (inputFlag == 0) {
     int i = 0;
     while (fgets(word, BUFSIZE, stdin) != NULL && word[0] != '\n') {
-      strcpy(wordsList[i++], strtok(word, "\n \0"));
-      insertNode(head, strLower(wordsList[i]));
+      word[strcspn(word, "\n\0")] = 0;
+      strcpy(wordsList[i], word);
+
+      // Define if the word should be case sensitive or not by the optarg flag.
+      char *isCaseSensitive = (caseFlag) ? wordsList[i++] 
+                                         : strLower(wordsList[i++]);
+
+      insertNode(head, isCaseSensitive);
     }
   }
 
   inorderTraversal(head);
-
 
   return 0;
 }
