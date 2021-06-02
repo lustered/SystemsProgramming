@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <unistdio.h>
 
 #define BUFSIZE 100
 
@@ -95,8 +94,8 @@ Node *insertNode(Node *head, char *info) {
 }
 
 int main(int argc, char *argv[]) {
-  int opt, caseFlag = 0, outputFlag = 0, inputFlag = 0;
-  char infileName[BUFSIZE];
+  int opt, caseFlag = 0, outputFlag = 0;
+  // char infileName[BUFSIZE];
   char outfileName[BUFSIZE];
 
   char wordsList[BUFSIZE][BUFSIZE];
@@ -115,29 +114,35 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // Grab input file
-  if (argc > optind)
-    strcpy(infileName, argv[argc - 1]);
+  // Grab input file TODO FIX
+  if (argc > optind){
+    freopen(argv[argc - 1], "r", stdin);
+    printf("Caught inputfile\n");
+  } 
 
   char word[BUFSIZE];
 
   Node *head = createNode("Something");
 
-  if (inputFlag == 0) {
-    int i = 0;
-    while (fgets(word, BUFSIZE, stdin) != NULL && word[0] != '\n') {
-      word[strcspn(word, "\n\0")] = 0;
-      strcpy(wordsList[i], word);
+  int i = 0;
 
-      // Define if the word should be case sensitive or not by the optarg flag.
-      char *isCaseSensitive = (caseFlag) ? wordsList[i++] 
-                                         : strLower(wordsList[i++]);
+  while (fgets(word, BUFSIZE, stdin) != NULL && word[0] != '\n') {
+    word[strcspn(word, "\n\0")] = 0;
+    strcpy(wordsList[i], word);
 
-      insertNode(head, isCaseSensitive);
-    }
+    // Define if the word should be case sensitive or not by the optarg flag.
+    char *isCaseSensitive =
+        (caseFlag) ? wordsList[i++] : strLower(wordsList[i++]);
+    insertNode(head, isCaseSensitive);
   }
 
-  inorderTraversal(head);
+  // stdin = fdopen(1, "w");
+  freopen("/dev/stdin", "r", stdin);
 
+  if (outputFlag)
+    freopen(outfileName, "w", stdout); // Send stdout to output file
+
+  inorderTraversal(head);  // Print nodes in in-order traversal
+  stdout = fdopen(0, "w"); // Return to the terminal's stdout
   return 0;
 }
