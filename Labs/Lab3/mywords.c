@@ -35,23 +35,27 @@ int main(int argc, char *argv[]) {
   char filename[ARGBUFSIZE];
   char substring[ARGBUFSIZE];
 
+  const char usage[100] = {"\nUsage: mywords [-c] [-s substring] filename\n"};
+
   // Iterate over the params using getopt.
   while ((opt = getopt(argc, argv, "cs:")) != -1) {
-    // Check param.
-    switch (opt) {
-    // Mark count flag.
-    case 'c':
+    switch (opt) { // Check param.
+    case 'c':      // Mark count flag.
       copt = true;
+
       break;
-    // Mark substring flag.
-    case 's':
+    case 's': // Mark substring flag.
+      if (optind >= argc) {
+        printf("Make sure you have supplied a substring and a filename\n");
+        fprintf(stderr, usage);
+        exit(1);
+      }
       sopt = true;
       strcpy(substring, argv[optind - 1]);
+
       break;
-    default:
-      // Default usage.
-      printf("\nUsage: mywords {optional [-c]} {optional [-s substring]} "
-             "filename\n");
+    default: // Default usage.
+      fprintf(stderr, usage);
       exit(1);
       break;
     }
@@ -60,8 +64,7 @@ int main(int argc, char *argv[]) {
   // Check if there was a filename arg.
   if (optind >= argc) {
     printf("Please make sure you have supplied a filename\n");
-    printf("Usage: mywords {optional [-c]} {optional [-s substring]} "
-             "filename\n");
+    fprintf(stderr, usage);
     exit(1);
   }
 
@@ -107,6 +110,7 @@ int main(int argc, char *argv[]) {
 
   // Display information.
   printf("File name: %s\n", filename);
+
   if (copt)
     printf("Words count: %d\n", wordCount);
 
