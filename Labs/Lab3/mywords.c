@@ -102,8 +102,9 @@ int main(int argc, char *argv[]) {
         } // end while
       }   // end while
     }     // end if
-    else {
+    else { // File doesnt exist in the directory
       printf("The file you have specified does not exist.\n");
+      fprintf(stderr, usage);
       exit(1);
     }
   } // end outer if
