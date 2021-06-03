@@ -24,9 +24,10 @@ int EXIT_MSG() {
 
 int main(int argc, char *argv[]) {
   int opt;
+  int bopt = 0, ropt = 0, vopt = 0;
 
   // Declare variables
-  int base = 0, bopt = 0, ropt = 0, vopt = 0;
+  double base = 0;
 
   // Check if the base is within limit.
   if (atoi(argv[argc - 1]) < 20000 || atoi(argv[argc - 1]) > 60000)
@@ -66,11 +67,11 @@ int main(int argc, char *argv[]) {
       // Option [-v] was used.
       vopt = 1;
       break;
+    case '?':
     default:
       // Default usage.
-      printf("Wrong flag passed.\n");
+      fprintf(stderr, "Wrong flag passed.\n");
       exit(EXIT_MSG());
-      break;
     }
   }
 
@@ -84,7 +85,7 @@ int main(int argc, char *argv[]) {
   base += (bopt) ? bopt : 0;
 
   // Display salary.
-  printf("Salary: $%.2lf\n", (double)base);
+  printf("Salary: $%.2lf\n", base);
 
   return 0;
 }
