@@ -23,6 +23,7 @@ int EXIT_MSG() {
 }
 
 int main(int argc, char *argv[]) {
+  // getopt flags
   int opt;
   int bopt = 0, ropt = 0, vopt = 0;
 
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]) {
       vopt = 1;
       break;
     case '?':
+      break;
     default:
       // Default usage.
       fprintf(stderr, "Wrong flag passed.\n");
