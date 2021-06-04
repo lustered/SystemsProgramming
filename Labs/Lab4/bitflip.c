@@ -18,17 +18,18 @@ int main() {
   uint32_t userNum = 0;
   int nth = 0;
 
-  // Get user input
+  // Get user input for the decimal
   do {
     printf("Please enter a number between 1-1000: ");
     scanf("%u", &userNum);
 
-  } while (userNum < 1 || userNum > 1000);
+  } while (userNum < 1 || userNum > 1000); // Check boundary
 
+  // Get user input for the position 
   do {
     printf("Please enter the bit to flip between 0 and 31: ");
     scanf("%d", &nth);
-  } while (nth < 0 || nth > 31);
+  } while (nth < 0 || nth > 31); // Check boundary
 
   /*
    * Breakdown:
@@ -36,11 +37,11 @@ int main() {
    *
    * We apply bitwise xor:
    *
-   *    001010 (10) userNum
-   * xor
-   *    000100 (4) 1 << nth
-   *    ------
-   *    001110 (14)
+   *      001010 (10) userNum
+   * xor  ||||||
+   *      000100 (4) 1 << nth
+   *      ------
+   *      001110 (14)
    */
   printf("New value: %u\n", userNum ^ (1 << nth));
 
