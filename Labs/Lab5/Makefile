@@ -8,4 +8,4 @@ test: counter
 	- ./counter
 
 clean:
-	 - rm counter
+	- rm counter
