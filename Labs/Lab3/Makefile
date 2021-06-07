@@ -1,25 +1,24 @@
 CC = gcc
 CFLAGS = -Wall
 
-
 mywords: mywords.c
 	$(CC) $(CFLAGS) mywords.c -o mywords 
 
 testfile:
 	@echo "If you look at what you have in life, you'll always have more. \
-	If you look at what you don't have in life, you'll never have enough." > testfile
+	If you look at what you don't have in life, you'll never have enough." > CarlosLuis_testfile
 
 tests: mywords testfile
 	- @printf "\nTest 1: Pass\n"
-	- ./mywords -c -s you testfile 
+	- ./mywords -c -s you CarlosLuis_testfile 
 	- @printf "\nTest 2: Pass\n"
-	- ./mywords -s you testfile 
+	- ./mywords -s you CarlosLuis_testfile 
 	- @printf "\nTest 3: Pass\n"
-	- ./mywords -c testfile 
+	- ./mywords -c CarlosLuis_testfile 
 	- @printf "\nTest 4: Fail - No filename\n"
 	- ./mywords -s you
 	- @printf "\nTest 5: Fail - No filename\n"
 	- ./mywords -c 
 
 clean:
-	- rm mywords testfile
+	- rm -f mywords CarlosLuis_testfile
