@@ -25,4 +25,4 @@ test4: bstsort
 	./bstsort -c wronginputfile.txt
 
 clean:
-	- rm  bstsort test1.txt test2.txt 
+	- rm -f bstsort test1.txt test2.txt 
