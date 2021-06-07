@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 // Size for strings
-#define BUFSIZE 100
+#define BUFSIZE 1000
 
 // Define a node structure that represents a node in a Binary Search Tree
 typedef struct Node {
@@ -47,19 +47,23 @@ char *strLower(char *string) {
 // Compare strings as case sensitive
 int _scmpSensitive(char *string1, char *string2) {
 
-  unsigned char *s1 = (unsigned char *)string1;
-  unsigned char *s2 = (unsigned char *)string2;
+  // Temporary characters. They will be used to compare each char in the string
+  unsigned char ch1, ch2;
 
-  unsigned char c1, c2;
+  // Iterate until there's a different character
+  while (ch1 == ch2) {
+    // Grab each character
+    ch1 = (unsigned char)*string1++;
+    ch2 = (unsigned char)*string2++;
 
-  do {
-    c1 = (unsigned char)*s1++;
-    c2 = (unsigned char)*s2++;
-    if (c1 == '\0')
-      return c1 - c2;
-  } while (c1 == c2);
+    // Check if either string reached the end
+    if (ch1 == '\0' || ch2 == '\0')
+      // if the end is reached, return the value
+      return ch1 - ch2;
+  }
 
-  return c1 - c2;
+  // If the characters weren't equal, return the value at that position
+  return ch1 - ch2;
 }
 
 // Print each node in-order traversal fashion
@@ -91,7 +95,7 @@ void freeTree(Node *node) {
 }
 
 Node *insertNode(Node *head, char *info) {
-  // Node mem wasn't allocated
+  // Node mem wasn't allocated yet
   if (head == NULL)
     head = createNode();
 
@@ -154,7 +158,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // Create a root node
+  // Create a root node and initialize it
   Node *head = createNode();
 
   // String to read each line from stdin
