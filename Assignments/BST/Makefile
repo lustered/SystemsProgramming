@@ -1,24 +1,27 @@
 CC = gcc
 CFLAGS = -Wall
+OUTPUT1 = test_output1
+OUTPUT2 = test_output2
+INPUTFILE = CarlosLuis_inputfile
 
 bstsort: bstsort.c
 	$(CC) $(CFLAGS) bstsort.c -o bstsort
 
 testfile:
-	@printf "apple\napple\nAPPLE\nAPPLE\nApple\nbanana\nBANANA\n" > CarlosLuis_inputfile
+	@printf "apple\napple\nAPPLE\nAPPLE\nApple\nbanana\nBANANA\n" > $(INPUTFILE)
 
 pass: bstsort testfile
-	@printf "Creating test file: CarlosLuis_inputfile\n"
+	@printf "Creating test file: $(INPUTFILE)\n"
 	@printf "\nTest1\n"
-	- ./bstsort -o test1.txt CarlosLuis_inputfile
+	- ./bstsort -o $(OUTPUT1) $(INPUTFILE)
 	@printf "\nTest2\n"
-	- ./bstsort -c -o test2.txt CarlosLuis_inputfile
-	@printf "\nRemoving test file: CarlosLuis_inputfile\n"
-	@rm CarlosLuis_inputfile
+	- ./bstsort -c -o $(OUTPUT2) $(INPUTFILE)
+	@printf "\nRemoving test file: $(INPUTFILE)\n"
+	@rm $(INPUTFILE)
 
 fail: bstsort
 	@printf "\nFail: Bad input file name\n"
 	- ./bstsort -c wronginputfile
 
 clean:
-	- rm -f bstsort test1.txt test2.txt 
+	- rm -f bstsort $(OUTPUT1) $(OUTPUT2)
