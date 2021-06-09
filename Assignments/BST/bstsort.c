@@ -66,6 +66,28 @@ int _scmpSensitive(char *string1, char *string2) {
   return ch1 - ch2;
 }
 
+// Compare strings as case insensitive
+int _scmpInsensitive(char *string1, char *string2) {
+
+  // Temporary characters. They will be used to compare each char in the string
+  unsigned char ch1, ch2;
+
+  // Iterate until there's a different character
+  while (ch1 == ch2) {
+    // Grab each character
+    ch1 = (unsigned char)tolower(*string1++);
+    ch2 = (unsigned char)tolower(*string2++);
+
+    // Check if either string reached the end
+    if (ch1 == '\0' || ch2 == '\0')
+      // if the end is reached, return the value
+      return ch1 - ch2;
+  }
+
+  // If the characters weren't equal, return the value at that position
+  return ch1 - ch2;
+}
+
 // Print each node in-order traversal fashion
 void inorderTraversal(Node *head) {
   // If the node is NULL, we either reached the end of the list or the root
