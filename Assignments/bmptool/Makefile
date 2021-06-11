@@ -7,5 +7,9 @@ bmplib.o:	bmplib.c bmplib.h
 main.o:	main.c bmplib.h 
 	$(CC) -Wall -c $< -o $@
 
+run: bmptool
+	./bmptool
+	@feh result.bmp
+
 clean:
-	rm -f bmptool *.o core *~
+	rm -f bmptool *.o core *~ result.bmp
