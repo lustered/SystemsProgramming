@@ -21,8 +21,8 @@
 // Define a node structure that represents a node in a Binary Search Tree
 typedef struct Node {
   char *info;         // Key
-  struct Node *left;  // Smaller values
-  struct Node *right; // Great values
+  struct Node *left;  // Greater values
+  struct Node *right; // Smaller values
 } Node;
 
 // Create a node and initialize its key and next values
@@ -95,12 +95,12 @@ void inorderTraversal(Node *head) {
   if (head == NULL)
     return;
 
-  inorderTraversal(head->left); // Traverse the left(smaller) nodes first
+  inorderTraversal(head->left); // Traverse the left nodes first
 
   // Print the node as it unwinds from  the recursion
   printf("%s\n", head->info);
 
-  inorderTraversal(head->right); // Traverse the right(greawter) nodes
+  inorderTraversal(head->right); // Traverse the right nodes
 }
 
 void freeTree(Node *node) {
@@ -129,18 +129,14 @@ Node *insertNode(Node *head, char *info) {
   }
 
   // Reject repeated keys
-  if (_scmpSensitive(head->info, info) == 0) {
-    // printf("[**REPEATED KEY**] [%s || %s]\n", head->info, info);
+  if (_scmpSensitive(head->info, info) == 0)
     return head;
-  } else if (_scmpSensitive(head->info, info) > 0) {
+  else if (_scmpSensitive(head->info, info) > 0)
     // Traverse left side of the tree (greater values)
-    // printf("[GOING LEFT] 1: %s || 2: %s\n", head->info, info);
     head->left = insertNode(head->left, info);
-  } else {
+  else
     // Traverse right side of the tree (smaller values)
-    // printf("[GOING RIGHT] 1: %s || 2: %s\n", head->info, info);
     head->right = insertNode(head->right, info);
-  }
 
   return head;
 }
@@ -185,7 +181,7 @@ int main(int argc, char *argv[]) {
   Node *head = createNode();
 
   // String to read each line from stdin
-  char* buffer = malloc(BUFSIZE);
+  char *buffer = malloc(BUFSIZE);
 
   // Read each line until the line is an empty line
   while (fgets(buffer, BUFSIZE, stdin) != NULL && buffer[0] != '\n') {
