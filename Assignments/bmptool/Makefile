@@ -4,7 +4,7 @@ bmptool:	bmplib.o main.o
 bmplib.o:	bmplib.c bmplib.h
 	$(CC) -Wall -c $< -o $@
 
-main.o:	main.c bmplib.h 
+main.o:	bmptool.c bmplib.h 
 	$(CC) -Wall -c $< -o $@
 
 run: bmptool
