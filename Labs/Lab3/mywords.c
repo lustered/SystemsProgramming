@@ -19,7 +19,7 @@
 #define ARGBUFSIZE 200   // Size of the text for the file name and substring
 
 // Set delimeters to split the text file's line into words.
-const char *delimeters[] = {"\"\n.,!/ "};
+static char delimeters[] = {"\"\n.,!/ "};
 
 int main(int argc, char *argv[]) {
   int opt;
@@ -40,19 +40,19 @@ int main(int argc, char *argv[]) {
   // Iterate over the params using getopt.
   while ((opt = getopt(argc, argv, "cs:")) != -1) {
     switch (opt) { // Check param.
-    case 'c':      // Mark count flag.
-      copt = true;
-
+    case 'c':
+      copt = true; // Count flag.
       break;
-    case 's': // Mark substring flag.
+    case 's': // Substring param.
       if (optind >= argc) {
         printf("Make sure you have supplied a substring and a filename\n");
         fprintf(stderr, usage);
         exit(1);
       }
       sopt = true;
-      strcpy(substring, argv[optind - 1]);
-
+      strcpy(substring, argv[optind - 1]); // Grab the string
+      break;
+    case '?':
       break;
     default: // Default usage.
       fprintf(stderr, usage);
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
       // Iterate over every line in the file
       while (fgets(line, FILEBUFSIZE, fileob) != NULL) {
         // Extract word given the delimeters.
-        char *word = strtok(line, *delimeters);
+        char *word = strtok(line, delimeters);
 
         // Count words
         while (word != NULL) {
@@ -97,11 +97,17 @@ int main(int argc, char *argv[]) {
             substringCount++;
 
           // Move onto the next word.
-          word = strtok(NULL, *delimeters);
+          word = strtok(NULL, delimeters);
 
-        } // end while
-      }   // end while
-    }     // end if
+        } // end inner while
+
+        // Free up allocated memory
+        free(word);
+      } // end outer while
+
+      // Close file descriptor
+      fclose(fileob);
+    } // end if
     else { // File doesnt exist in the directory
       printf("The file you have specified does not exist.\n");
       fprintf(stderr, usage);
