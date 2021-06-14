@@ -123,7 +123,8 @@ Node *insertNode(Node *head, char *info) {
 
   // Mem was allocated but a key wasn't inserted
   if (head->info == NULL) {
-    head->info = info;
+    // Insert the word's copy as the key. Memory is allocated as well
+    head->info = strdup(info);
     return head;
   }
 
@@ -184,7 +185,7 @@ int main(int argc, char *argv[]) {
   Node *head = createNode();
 
   // String to read each line from stdin
-  char buffer[BUFSIZE];
+  char* buffer = malloc(BUFSIZE);
 
   // Read each line until the line is an empty line
   while (fgets(buffer, BUFSIZE, stdin) != NULL && buffer[0] != '\n') {
@@ -192,15 +193,14 @@ int main(int argc, char *argv[]) {
     // Strip terminator and newlines characters
     buffer[strcspn(buffer, "\n\0")] = 0;
 
-    // Put the word in the buffer in a string
-    char *word = malloc(BUFSIZE);
-    strcpy(word, buffer);
-
     // Check the word should be case sensitive or not by the optarg flag
-    word = (caseFlag) ? word : strLower(word);
+    buffer = (caseFlag) ? buffer : strLower(buffer);
 
-    insertNode(head, word); // Insert the word in the bst
+    insertNode(head, buffer); // Insert the word in the bst
   }
+
+  // Free memory allocated used to read lines
+  free(buffer);
 
   // Check if the output flag was specified
   if (outputFlag)
