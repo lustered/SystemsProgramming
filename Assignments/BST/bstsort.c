@@ -47,8 +47,11 @@ char *strLower(char *string) {
 // Compare strings as case sensitive
 int _scmpSensitive(char *string1, char *string2) {
 
-  // Temporary characters. They will be used to compare each char in the string
-  unsigned char ch1, ch2;
+  // Temporary characters. They will be used to compare each char in the string.
+  // It is necessary to initialize them to avoid undefined behavior stack 
+  // allocation
+  unsigned char ch1 = 0;
+  unsigned char ch2 = 0;
 
   // Iterate until there's a different character
   while (ch1 == ch2) {
