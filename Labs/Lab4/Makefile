@@ -5,4 +5,4 @@ bitflip: bitflip.c
 	$(CC) $(CFLAGS) bitflip.c -o bitflip 
 
 clean:
-	rm bitflip
+	rm -f bitflip
