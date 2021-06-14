@@ -24,7 +24,7 @@ fail: bstsort
 	- ./bstsort -c wronginputfile
 
 memoryleak: testfile bstsort
-	- @valgrind --leak-check=full --track-origins=yes ./bstsort -c testout2 CarlosLuis_inputfile
+	- @valgrind --track-origins=yes --leak-check=full ./bstsort -c -o memoryTestOutput CarlosLuis_inputfile 
 
 clean:
-	- rm -f bstsort $(OUTPUT1) $(OUTPUT2) $(INPUTFILE)
+	- rm -f bstsort $(OUTPUT1) $(OUTPUT2) $(INPUTFILE) memoryTestOutput
