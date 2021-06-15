@@ -5,11 +5,13 @@
  * people or sources from the internet.
  */
 
-/* This program counts the number of words and/or substrings in a file.
+/* This program counts the number of words and/or substrings in a file. The
+ * program must receive an existing and valid file. Any number of flags can be
+ * used or none.
+ *
  * Usage: mywords [-c] [-s substring] filename
  */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,8 +26,8 @@ static char delimeters[] = {"\"\n.,!/ "};
 int main(int argc, char *argv[]) {
   int opt;
   // Arguments checks.
-  bool copt = false;
-  bool sopt = false;
+  int copt = 0;
+  int sopt = 0;
 
   // Number of words or substrings in the file.
   int wordCount = 0;
@@ -41,7 +43,7 @@ int main(int argc, char *argv[]) {
   while ((opt = getopt(argc, argv, "cs:")) != -1) {
     switch (opt) { // Check param.
     case 'c':
-      copt = true; // Count flag.
+      copt = 1; // Count flag.
       break;
     case 's': // Substring param.
       if (optind >= argc) {
@@ -49,7 +51,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, usage);
         exit(1);
       }
-      sopt = true;
+      sopt = 1;
       strcpy(substring, argv[optind - 1]); // Grab the string
       break;
     case '?':
@@ -61,7 +63,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // Check if there was a filename arg.
+  // Check if there was a filename arg
   if (optind >= argc) {
     printf("Please make sure you have supplied a filename\n");
     fprintf(stderr, usage);
@@ -74,7 +76,7 @@ int main(int argc, char *argv[]) {
   // Make sure an operation is needed.
   if (copt || sopt) {
     if (access(filename, F_OK) == 0) {
-      // Create a pointer to a file.
+      // Create a pointer to read from the file
       FILE *fileob = fopen(filename, "r");
 
       // String to store each line from the file
@@ -89,25 +91,25 @@ int main(int argc, char *argv[]) {
         while (word != NULL) {
           // printf("Word: %s\n", word);
 
-          // Increase word count.
+          // Increase word count
           wordCount++;
 
-          // Check for substring.
+          // Check for substring
           if (strstr(word, substring))
             substringCount++;
 
-          // Move onto the next word.
+          // Move onto the next word
           word = strtok(NULL, delimeters);
 
         } // end inner while
 
-        // Free up allocated memory
-        free(word);
+        free(word); // Free up allocated memory
+
       } // end outer while
 
-      // Close file descriptor
-      fclose(fileob);
-    } // end if
+      fclose(fileob); // Close file pointer
+
+    }      // end if
     else { // File doesnt exist in the directory
       printf("The file you have specified does not exist.\n");
       fprintf(stderr, usage);
@@ -115,7 +117,7 @@ int main(int argc, char *argv[]) {
     }
   } // end outer if
 
-  // Display information.
+  // Display information
   printf("File name: %s\n", filename);
 
   if (copt)
