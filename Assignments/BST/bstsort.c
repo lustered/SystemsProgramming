@@ -50,8 +50,7 @@ int _scmpSensitive(char *string1, char *string2) {
   // Temporary characters. They will be used to compare each char in the string.
   // It is necessary to initialize them to avoid undefined behavior stack 
   // allocation
-  unsigned char ch1 = 0;
-  unsigned char ch2 = 0;
+  unsigned char ch1 = 0, ch2 = 0;
 
   // Iterate until there's a different character
   while (ch1 == ch2) {
@@ -73,7 +72,7 @@ int _scmpSensitive(char *string1, char *string2) {
 int _scmpInsensitive(char *string1, char *string2) {
 
   // Temporary characters. They will be used to compare each char in the string
-  unsigned char ch1, ch2;
+  unsigned char ch1 = 0, ch2 = 0;
 
   // Iterate until there's a different character
   while (ch1 == ch2) {
@@ -92,18 +91,18 @@ int _scmpInsensitive(char *string1, char *string2) {
 }
 
 // Print each node in-order traversal fashion
-void inorderTraversal(Node *head) {
+void inorderTraversal(Node *node) {
   // If the node is NULL, we either reached the end of the list or the root
   // wasn't initialized
-  if (head == NULL)
+  if (node == NULL)
     return;
 
-  inorderTraversal(head->left); // Traverse the left nodes first
+  inorderTraversal(node->left); // Traverse the left nodes first
 
-  // Print the node as it unwinds from  the recursion
-  printf("%s\n", head->info);
+  // Print the node as it unwinds from the recursion
+  printf("%s\n", node->info);
 
-  inorderTraversal(head->right); // Traverse the right nodes
+  inorderTraversal(node->right); // Traverse the right nodes
 }
 
 void freeTree(Node *node) {
@@ -198,8 +197,7 @@ int main(int argc, char *argv[]) {
     insertNode(head, buffer); // Insert the word in the bst
   }
 
-  // Free memory allocated used to read lines
-  free(buffer);
+  free(buffer); // Free memory allocated used to read lines
 
   // Check if the output flag was specified
   if (outputFlag)
