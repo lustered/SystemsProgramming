@@ -1,8 +1,8 @@
-CC = gcc
-CFLAGS = -Wall
+CC=gcc
+CFLAGS=-Wall
 
 mywords: mywords.c
-	$(CC) $(CFLAGS) mywords.c -o mywords 
+	$(CC) $(CFLAGS) $< -o $@ 
 
 testfile:
 	@printf "Creating test file.\n"
