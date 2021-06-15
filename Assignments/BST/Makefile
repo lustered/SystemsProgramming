@@ -1,11 +1,11 @@
-CC = gcc
-CFLAGS = -Wall
-OUTPUT1 = test_output1
-OUTPUT2 = test_output2
-INPUTFILE = CarlosLuis_inputfile
+CC=gcc
+CFLAGS=-Wall
+OUTPUT1=test_output1
+OUTPUT2=test_output2
+INPUTFILE=CarlosLuis_inputfile
 
 bstsort: bstsort.c
-	$(CC) $(CFLAGS) bstsort.c -o bstsort
+	$(CC) $(CFLAGS) $< -o $@
 
 testfile:
 	@printf "apple\napple\nAPPLE\nAPPLE\nApple\nbanana\nBANANA\n" > $(INPUTFILE)
