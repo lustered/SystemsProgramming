@@ -8,6 +8,7 @@ bstsort: bstsort.c
 	$(CC) $(CFLAGS) $< -o $@
 
 testfile:
+	@printf "Creating test file.\n"
 	@printf "apple\napple\nAPPLE\nAPPLE\nApple\nbanana\nBANANA\n" > $(INPUTFILE)
 
 tests: bstsort testfile
