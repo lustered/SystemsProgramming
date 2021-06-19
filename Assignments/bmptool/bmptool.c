@@ -122,11 +122,15 @@ int verticalflip(PIXEL *original, PIXEL **new, int rows, int cols) {
  * newcols  - the new number of cols (scale*cols)
  */
 int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
-            int *newcols, float scale) {
+            int *newcols) {
 
   if ((rows <= 0) || (cols <= 0))
     return -1;
 
+  // Fixed scale factor
+  int scale = 2;
+
+  // Declare new rows
   *newrows = (rows * (int)scale);
   *newcols = (cols * (int)scale);
 
@@ -152,7 +156,7 @@ int main() {
   readFile("example.bmp", &r, &c, &b);
   // flip(b, &nb, r, c);
   // verticalflip(b, &nb, r, c);
-  // enlarge(b, r, c, &nb, &nr, &nc, 3);
+  // enlarge(b, r, c, &nb, &nr, &nc);
   rotate(b, r, c, &nb, &nr, &nc);
   writeFile("result.bmp", r, c, nb);
 
