@@ -24,6 +24,9 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
 
   *new = malloc(rows * cols * sizeof(PIXEL));
 
+  *newcols = rows;
+  *newrows = cols;
+
   /* Using a single loop, keep in mind:
    * row = i / cols;
    * col = i % cols;
@@ -34,7 +37,7 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
     PIXEL *o = original + (i / cols) * cols + (i % cols);
 
     // Grab the pixel at the corresponding position in the new photo
-    PIXEL *n = *new + (cols - (i % cols) - 1) * rows + (i / cols);
+    PIXEL *n = *new + (*newcols - (i % *newcols) - 1) * *newrows + (i / *newcols);
 
     // Copy the original's pixel to the new photo
     *n = *o;
@@ -136,7 +139,7 @@ int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
 
   *new = malloc(*newrows * *newcols * sizeof(PIXEL));
 
-  for(int i = 0; i < *newrows; i++){
+  for (int i = 0; i < *newrows; i++) {
     PIXEL *o = original + (int)(i / scale) * cols;
     PIXEL *n = *new + i * *newcols;
 
