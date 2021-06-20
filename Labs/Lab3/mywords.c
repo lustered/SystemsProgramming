@@ -54,7 +54,10 @@ int main(int argc, char *argv[]) {
       sopt = 1;
       strcpy(substring, argv[optind - 1]); // Grab the string
       break;
-    case '?':
+    case '?': // Invalid option passed
+      printf("Invalid flag usage.\n");
+      fprintf(stderr, usage);
+      exit(1);
       break;
     default: // Default usage.
       fprintf(stderr, usage);
@@ -73,52 +76,53 @@ int main(int argc, char *argv[]) {
   // Get filename
   strcpy(filename, argv[argc - 1]);
 
+  FILE *fileob;
+  // Check the file exists
+  if (access(filename, F_OK) == 0)
+    // Create a pointer to read from the file
+    fileob = fopen(filename, "r");
+  else { // File doesnt exist in the directory
+    printf("The file you have specified does not exist.\n");
+    fprintf(stderr, usage);
+    exit(1);
+  }
+
+  // String to store each line from the file
+  char line[FILEBUFSIZE];
+
   // Make sure an operation is needed.
   if (copt || sopt) {
-    if (access(filename, F_OK) == 0) {
-      // Create a pointer to read from the file
-      FILE *fileob = fopen(filename, "r");
+    // Iterate over every line in the file
+    while (fgets(line, FILEBUFSIZE, fileob) != NULL) {
+      // Extract word given the delimeters.
+      char *word = strtok(line, delimeters);
 
-      // String to store each line from the file
-      char line[FILEBUFSIZE];
+      // Count words
+      while (word != NULL) {
+        // printf("Word: %s\n", word);
 
-      // Iterate over every line in the file
-      while (fgets(line, FILEBUFSIZE, fileob) != NULL) {
-        // Extract word given the delimeters.
-        char *word = strtok(line, delimeters);
+        // Increase word count
+        wordCount++;
 
-        // Count words
-        while (word != NULL) {
-          // printf("Word: %s\n", word);
+        // Check for substring
+        if (strstr(word, substring))
+          substringCount++;
 
-          // Increase word count
-          wordCount++;
+        // Move onto the next word
+        word = strtok(NULL, delimeters);
 
-          // Check for substring
-          if (strstr(word, substring))
-            substringCount++;
+      } // end inner while
 
-          // Move onto the next word
-          word = strtok(NULL, delimeters);
+      free(word); // Free up allocated memory
 
-        } // end inner while
+    }    // end outer while
+  }      // end outer if
+  else { // No options were passed. Print the entire file to stdout
+    while (fgets(line, FILEBUFSIZE, fileob) != NULL)
+      printf("%s", line);
+  }
 
-        free(word); // Free up allocated memory
-
-      } // end outer while
-
-      fclose(fileob); // Close file pointer
-
-    }      // end if
-    else { // File doesnt exist in the directory
-      printf("The file you have specified does not exist.\n");
-      fprintf(stderr, usage);
-      exit(1);
-    }
-  } // end outer if
-
-  // Display information
-  printf("File name: %s\n", filename);
+  fclose(fileob); // Close file pointer
 
   if (copt)
     printf("Words count: %d\n", wordCount);
