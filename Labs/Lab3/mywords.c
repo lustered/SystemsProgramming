@@ -124,6 +124,7 @@ int main(int argc, char *argv[]) {
 
   fclose(fileob); // Close file pointer
 
+  // Display information
   if (copt)
     printf("Words count: %d\n", wordCount);
 
