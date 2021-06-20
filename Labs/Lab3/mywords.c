@@ -20,9 +20,6 @@
 #define FILEBUFSIZE 1000 // Size allowed for each line.
 #define ARGBUFSIZE 200   // Size of the text for the file name and substring
 
-// Set delimeters to split the text file's line into words.
-static char delimeters[] = {"\"\n.,!/ "};
-
 int main(int argc, char *argv[]) {
   int opt;
   // Arguments checks.
@@ -36,6 +33,9 @@ int main(int argc, char *argv[]) {
   // Declare strings for the file and substring.
   char filename[ARGBUFSIZE];
   char substring[ARGBUFSIZE];
+
+  // Set delimeters to split the text file's line into words.
+  static char delimeters[] = {"\"\n.,!/ "};
 
   const char usage[100] = {"\nUsage: mywords [-c] [-s substring] filename\n"};
 
