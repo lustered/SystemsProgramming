@@ -19,11 +19,11 @@ tests: mywords testfile
 	- @printf "\nTest 4: Fail - No filename\n"
 	- ./mywords -s you
 	- @printf "\nTest 5: Fail - No filename\n"
-	- ./mywords -c 
+	- ./mywords -c
 	- @printf "\nTest 6: Fail - No substring\n"
-	- ./mywords -s testfile 
+	- ./mywords -s testfile
 	- @printf "\nTest 7: No flags passed\n"
-	- ./mywords testfile 
+	- ./mywords testfile
 	- @printf "\nRemoving test file\n"
 	- @rm -f testfile
 
