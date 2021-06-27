@@ -48,7 +48,7 @@ char *strLower(char *string) {
 int _scmpSensitive(char *string1, char *string2) {
 
   // Temporary characters. They will be used to compare each char in the string.
-  // It is necessary to initialize them to avoid undefined behavior stack 
+  // It is necessary to initialize them to avoid undefined behavior stack
   // allocation
   unsigned char ch1 = 0, ch2 = 0;
 
@@ -68,7 +68,14 @@ int _scmpSensitive(char *string1, char *string2) {
   return ch1 - ch2;
 }
 
-// Compare strings as case insensitive
+/*
+ * Compare strings as case insensitive
+ *
+ * This function is not used due to the manner in which words are passed to the
+ * BST. Since when comparing capital-insensitive words, we make the words
+ * lowercase, they can be compared with _scmpSensitive and it will yield the
+ * same result with less comparisons.
+ */
 int _scmpInsensitive(char *string1, char *string2) {
 
   // Temporary characters. They will be used to compare each char in the string
@@ -150,7 +157,7 @@ int main(int argc, char *argv[]) {
   // String to grab output file
   char outfileName[BUFSIZE];
 
-  char usage[] = {"Usage: bstsort [-c] [-o output_file] [input_file]\n"};
+  const char usage[] = {"Usage: bstsort [-c] [-o output_file] [input_file]\n"};
 
   // Check for parameter flags
   while ((opt = getopt(argc, argv, "co:")) != -1) {
@@ -164,7 +171,7 @@ int main(int argc, char *argv[]) {
       strcpy(outfileName, optarg);
       break;
     default: // Wrong flag passed
-      fprintf(stderr, "%s\n", usage);
+      fprintf(stderr, usage);
       exit(1);
     }
   }
@@ -185,16 +192,18 @@ int main(int argc, char *argv[]) {
   // String to read each line from stdin
   char *buffer = malloc(BUFSIZE);
 
-  // Read each line until the line is an empty line
+  // Read each line until the line is an empty line or EOF of file
   while (fgets(buffer, BUFSIZE, stdin) != NULL && buffer[0] != '\n') {
 
-    // Strip terminator and newlines characters
-    buffer[strcspn(buffer, "\n\0")] = 0;
+    // Strip newlines characters
+    buffer[strcspn(buffer, "\n")] = 0;
 
     // Check the word should be case sensitive or not by the optarg flag
     buffer = (caseFlag) ? buffer : strLower(buffer);
 
-    insertNode(head, buffer); // Insert the word in the bst
+    // Reject empty strings
+    if (strlen(buffer) > 1)
+      insertNode(head, buffer); // Insert the word in the bst
   }
 
   free(buffer); // Free memory allocated used to read lines
