@@ -28,6 +28,13 @@ typedef struct Node {
 // Create a node and initialize its key and next values
 Node *createNode() {
   Node *ret = (Node *)malloc(sizeof(Node)); // Allocate memory
+
+  // Check malloc was successful
+  if (ret == NULL) {
+    fprintf(stderr, "Malloc failed. Free up resources.");
+    exit(1);
+  }
+
   ret->info = NULL;
   ret->right = NULL;
   ret->left = NULL;
@@ -104,6 +111,12 @@ void inorderTraversal(Node *node) {
   if (node == NULL)
     return;
 
+  // Check if the string was inserted
+  if (node->info == NULL) {
+    fprintf(stderr, "No words in the bst\n");
+    exit(1);
+  }
+
   inorderTraversal(node->left); // Traverse the left nodes first
 
   // Print the node as it unwinds from the recursion
@@ -152,7 +165,7 @@ Node *insertNode(Node *head, char *info) {
 
 int main(int argc, char *argv[]) {
   // Declare and initialize optarg flags
-  int opt, caseFlag = 0, outputFlag = 0;
+  int opt, caseFlag = 0, outputFlag = 0, infileFlag = 0;
 
   // String to grab output file
   char outfileName[BUFSIZE];
@@ -179,8 +192,11 @@ int main(int argc, char *argv[]) {
   // Grab input file and check it exists. If it does, stdin will be the file
   if (argc > optind) {
     if (access(argv[argc - 1], F_OK) == 0) // Check the file exists
+    {
       freopen(argv[argc - 1], "r", stdin); // The file will be in stdin buffer
-    else {
+      infileFlag = 1;
+
+    } else {
       fprintf(stderr, "Input file does not exist\n"); // Display error message
       exit(1);
     }
@@ -192,13 +208,26 @@ int main(int argc, char *argv[]) {
   // String to read each line from stdin
   char *buffer = malloc(BUFSIZE);
 
-  // Read each line until the line is an empty line or EOF of file
-  while (fgets(buffer, BUFSIZE, stdin) != NULL && buffer[0] != '\n') {
+  // Check malloc was successful
+  if (buffer == NULL) {
+    fprintf(stderr, "Malloc failed. Free up resources.");
+    exit(1);
+  }
+
+  /*
+   * Read each line until the line is an empty line or EOF of file.
+   *
+   * The second expression checks if it's reading a file. If it is, then it will
+   * stop reading on EOF. If it's reading from stdin, it will check for empty
+   * lines
+   */
+  while (fgets(buffer, BUFSIZE, stdin) != NULL &&
+         (infileFlag ? 1 : (buffer[0] != '\n'))) {
 
     // Strip newlines characters
     buffer[strcspn(buffer, "\n")] = 0;
 
-    // Check the word should be case sensitive or not by the optarg flag
+    // Check if the word should be case sensitive or not by the optarg flag
     buffer = (caseFlag) ? buffer : strLower(buffer);
 
     // Reject empty strings
