@@ -131,7 +131,7 @@ int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
     return -1;
 
   // Fixed scale factor
-  int scale = 2;
+  double scale = 2;
 
   // Declare new rows
   *newrows = (rows * (int)scale);
@@ -159,9 +159,11 @@ int main() {
   readFile("example.bmp", &r, &c, &b);
   // flip(b, &nb, r, c);
   // verticalflip(b, &nb, r, c);
-  // enlarge(b, r, c, &nb, &nr, &nc);
-  rotate(b, r, c, &nb, &nr, &nc);
-  writeFile("result.bmp", r, c, nb);
+  // writeFile("result.bmp", r, c, nb);
+
+  // rotate(b, r, c, &nb, &nr, &nc);
+  enlarge(b, r, c, &nb, &nr, &nc);
+  writeFile("result.bmp", nr, nc, nb);
 
   // printf("Rows: %d | Columns: %d\n", r, c);
   // printf("New Rows: %d | New Columns: %d\n", nr, nc);
