@@ -25,7 +25,7 @@ int main() {
 
   } while (userNum < 1 || userNum > 1000); // Check boundary
 
-  // Get user input for the position 
+  // Get user input for the position
   do {
     printf("Please enter the bit to flip between 0 and 31: ");
     scanf("%d", &nth);
@@ -39,9 +39,9 @@ int main() {
    *
    *      001010 (10) userNum
    * xor  ||||||
-   *      000100 (4) 1 << nth
+   *      000100 (4) 1 << 2 (nth position)
    *      ------
-   *      001110 (14)
+   *      001110 (2 + 4 + 8 = 14)
    */
   printf("New value: %u\n", userNum ^ (1 << nth));
 
