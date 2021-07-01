@@ -1,15 +1,15 @@
-bmptool:	bmplib.o main.o
-	$(CC) bmplib.o main.o -o $@
+bmptool:	bmplib.o bmptool.o
+	$(CC) bmplib.o bmptool.o -o $@
 
 bmplib.o:	bmplib.c bmplib.h
 	$(CC) -Wall -c $< -o $@
 
-main.o:	bmptool.c bmplib.h 
+bmptool.o:	bmptool.c bmplib.h 
 	$(CC) -Wall -c $< -o $@
 
-run: bmptool
-	./bmptool
-	@feh result.bmp
+tests: bmptool
+	- ./bmptool -s -r -o ret example.bmp
+	@feh ret
 
 clean:
 	rm -f bmptool *.o core *~ result.bmp
