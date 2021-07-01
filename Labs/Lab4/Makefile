@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall
 
 bitflip: bitflip.c
-	$(CC) $(CFLAGS) bitflip.c -o bitflip 
+	$(CC) $(CFLAGS) $< -o $@ 
 
 clean:
 	rm -f bitflip
