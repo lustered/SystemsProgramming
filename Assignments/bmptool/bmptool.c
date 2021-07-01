@@ -1,8 +1,10 @@
 #include "bmplib.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-// TODO TODO TODO: ADD COMMENTS - REFORMAT
+#define BUFSIZE 1000
 
 /*
  * This method rotates a 24-bit, uncompressed .bmp file 90 degrees clockwise
@@ -22,10 +24,11 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
   if ((rows <= 0) || (cols <= 0))
     return -1;
 
-  *new = malloc(rows * cols * sizeof(PIXEL));
-
   *newcols = rows;
   *newrows = cols;
+
+  if (*new == NULL)
+    *new = malloc(*newrows * *newcols * sizeof(PIXEL));
 
   /* Using a single loop, keep in mind:
    * row = i / cols;
@@ -37,7 +40,8 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
     PIXEL *o = original + (i / cols) * cols + (i % cols);
 
     // Grab the pixel at the corresponding position in the new photo
-    PIXEL *n = *new + (*newcols - (i % *newcols) - 1) * *newrows + (i / *newcols);
+    PIXEL *n =
+        *new + (*newcols - (i % *newcols) - 1) * *newrows + (i / *newcols);
 
     // Copy the original's pixel to the new photo
     *n = *o;
@@ -92,7 +96,8 @@ int verticalflip(PIXEL *original, PIXEL **new, int rows, int cols) {
   if ((rows <= 0) || (cols <= 0))
     return -1;
 
-  *new = malloc(rows * cols * sizeof(PIXEL));
+  if (*new == NULL)
+    *new = malloc(rows * cols * sizeof(PIXEL));
 
   /* Using a single loop, keep in mind:
    * row = i / cols;
@@ -137,11 +142,12 @@ int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
   *newrows = (rows * (int)scale);
   *newcols = (cols * (int)scale);
 
-  *new = malloc(*newrows * *newcols * sizeof(PIXEL));
+  if (*new == NULL)
+    *new = malloc(*newrows * *newcols * sizeof(PIXEL));
 
   for (int i = 0; i < *newrows; i++) {
     PIXEL *o = original + (int)(i / scale) * cols;
-    PIXEL *n = *new + i * *newcols;
+    PIXEL *n = *new + i **newcols;
 
     for (int x = 0; x < cols; x++, o++)
       for (int y = 0; y < scale; y++)
@@ -151,24 +157,108 @@ int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
   return 0;
 }
 
-int main() {
-  int r, c;
-  int nr, nc;
-  PIXEL *b, *nb;
+int main(int argc, char *argv[]) {
+  int opt, fflag = 0, rflag = 0, sflag = 0, vflag = 0;
+  char *outputFile = NULL;
+  char *inputFile = NULL;
+  const char usage[] = {
+      "bmptool [-f | -r | -s | -v ] [-o output_file] [input_file]"};
 
-  readFile("example.bmp", &r, &c, &b);
-  // flip(b, &nb, r, c);
-  // verticalflip(b, &nb, r, c);
-  // writeFile("result.bmp", r, c, nb);
+  // Check for parameter flags
+  while ((opt = getopt(argc, argv, "frsvo:")) != -1) {
+    // Check param.
+    switch (opt) {
+    case 'f': // Flip horizontally
+      fflag = 1;
+      break;
+    case 'r': // Rotate 90 degrees clockwise
+      rflag = 1;
+      break;
+    case 's': // Scale by factor of 2
+      sflag = 1;
+      break;
+    case 'v': // Vertical flip
+      vflag = 1;
+      break;
+    case 'o': // Specified output file flag
+      outputFile = optarg;
+      break;
+    case '?':
+      break;
+    default:
+      fprintf(stderr, usage);
+      exit(1);
+    }
+  }
 
-  // rotate(b, r, c, &nb, &nr, &nc);
-  enlarge(b, r, c, &nb, &nr, &nc);
-  writeFile("result.bmp", nr, nc, nb);
+  // Grab input file and check it exists. If it does, stdin will be the file
+  if (argc > optind) {
+    if (access(argv[argc - 1], F_OK) == 0) // Check the file exists
+      inputFile = argv[argc - 1];
+  }
 
-  // printf("Rows: %d | Columns: %d\n", r, c);
-  // printf("New Rows: %d | New Columns: %d\n", nr, nc);
+  // Define row, col
+  int r = 0, c = 0;
+  // Define newrow, newcol
+  int nr = 0, nc = 0;
 
-  free(b);
-  free(nb);
+  // Define an array of bitmaps
+  PIXEL **bitmaps = malloc(sizeof(PIXEL) * 15);
+  int idx = 0; // keep track of index
+
+  // Read from either stdin or input file passed
+  readFile(inputFile, &r, &c, &bitmaps[0]);
+
+  // Enlarge bmp image by factor of 2
+  if (sflag) {
+    printf("Enlarge\n");
+
+    enlarge(bitmaps[idx], r, c, &bitmaps[idx + 1], &nr, &nc);
+    // Update row/col
+    r = nr;
+    c = nc;
+
+    idx++;
+  }
+
+  // Rotate image 90 degrees clockwise
+  if (rflag) {
+    printf("Rotate\n");
+
+    rotate(bitmaps[idx], r, c, &bitmaps[idx + 1], &nr, &nc);
+    // Update row/col
+    r = nr;
+    c = nc;
+
+    idx++;
+  }
+
+  // Flip image vertically
+  if (vflag) {
+    printf("Vertical Flip\n");
+
+    verticalflip(bitmaps[idx], &bitmaps[idx + 1], r, c);
+
+    idx++;
+  }
+
+  // Flip image horizontally
+  if (fflag) {
+    printf("Horizontal Flip\n");
+
+    flip(bitmaps[idx], &bitmaps[idx + 1], r, c);
+    idx++;
+  }
+
+  // Write to either stdout or defined output file
+  writeFile(outputFile, r, c, bitmaps[idx]);
+
+  // Free up allocated memory
+  for (int i = 0; i < 5; i++)
+    if (bitmaps[i] != NULL)
+      free(bitmaps[i]);
+
+  free(bitmaps);
+
   return 0;
 }
