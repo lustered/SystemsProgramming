@@ -4,8 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define BUFSIZE 1000
-
 /*
  * This method rotates a 24-bit, uncompressed .bmp file 90 degrees clockwise
  * that has been read in using readFile().
@@ -41,7 +39,7 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
 
     // Grab the pixel at the corresponding position in the new photo
     PIXEL *n =
-        *new + (*newcols - (i % *newcols) - 1) * *newrows + (i / *newcols);
+        *new + (*newrows - (i % *newrows) - 1) * *newcols + (i / *newrows);
 
     // Copy the original's pixel to the new photo
     *n = *o;
