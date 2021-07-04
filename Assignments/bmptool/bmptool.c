@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
   int nr = 0, nc = 0;
 
   // Define an array of bitmaps
-  PIXEL **bitmaps = (PIXEL **)malloc(9 * sizeof(PIXEL));
+  PIXEL *bitmaps[5];
 
   int idx = 0; // keep track of index
 
@@ -271,8 +271,6 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < 5; i++)
     if (bitmaps[i] != NULL)
       free(bitmaps[i]);
-
-  free(bitmaps);
 
   return 0;
 }
