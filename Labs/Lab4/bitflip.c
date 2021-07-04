@@ -15,6 +15,10 @@
 #include <stdlib.h>
 
 uint32_t validate(char *num_src, uint32_t *num_dst) {
+  // Check for null string
+  if(num_src == NULL)
+    return -1;
+
   // Get a pointer to the start of the string
   char *p = num_src;
 
@@ -84,7 +88,7 @@ int main() {
 
   /*
    * Breakdown:
-   * (1 << nth position {2} ): 000001 (1) << 2 = 000100 (4)
+   * (1 << 2 [nth position]): 000001 (1) << 2 = 000100 (4)
    *
    * We apply bitwise xor:
    *
