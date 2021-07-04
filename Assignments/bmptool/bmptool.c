@@ -22,11 +22,12 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
   if ((rows <= 0) || (cols <= 0))
     return -1;
 
+  // Declare new rows and cols
   *newcols = rows;
   *newrows = cols;
 
-  if (*new == NULL)
-    *new = malloc(*newrows * *newcols * sizeof(PIXEL));
+  // Allocate memory for the new bitmap
+  *new = (PIXEL *)malloc(*newrows * *newcols * sizeof(PIXEL));
 
   /* Using a single loop, keep in mind:
    * row = i / cols;
@@ -94,8 +95,8 @@ int verticalflip(PIXEL *original, PIXEL **new, int rows, int cols) {
   if ((rows <= 0) || (cols <= 0))
     return -1;
 
-  if (*new == NULL)
-    *new = malloc(rows * cols * sizeof(PIXEL));
+  // Allocate memory for the new bitmap
+  *new = (PIXEL *)malloc(rows * cols * sizeof(PIXEL));
 
   /* Using a single loop, keep in mind:
    * row = i / cols;
@@ -134,19 +135,26 @@ int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
     return -1;
 
   // Fixed scale factor
-  double scale = 2;
+  int scale = 2;
 
-  // Declare new rows
-  *newrows = (rows * (int)scale);
-  *newcols = (cols * (int)scale);
+  // Declare new rows and cols
+  *newrows = rows * scale;
+  *newcols = cols * scale;
 
-  if (*new == NULL)
-    *new = malloc(*newrows * *newcols * sizeof(PIXEL));
+  // Allocate memory for the new bitmap
+  *new = (PIXEL *)malloc((*newrows) * (*newcols) * sizeof(PIXEL));
 
   for (int i = 0; i < *newrows; i++) {
-    PIXEL *o = original + (int)(i / scale) * cols;
-    PIXEL *n = *new + i **newcols;
+    // Iterate throguh the rows of the original image
+    PIXEL *o = original + (i / scale) * cols;
+    // Grab a pointer to its respective column in the new image
+    PIXEL *n = *new + (i * *newcols);
 
+    /* Write each column(scaled) to the new bitmap.
+     *
+     * We can see the process if we half cols in the following for loop,
+     * and only half of the image will be written vertically.
+     */
     for (int x = 0; x < cols; x++, o++)
       for (int y = 0; y < scale; y++)
         *n++ = *o;
@@ -157,8 +165,12 @@ int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
 
 int main(int argc, char *argv[]) {
   int opt, fflag = 0, rflag = 0, sflag = 0, vflag = 0;
+
+  // Declare in/out files. Initializing them to NULL so if they're not assigned,
+  // readFile will read from stdin, and writeFile will output to stdout
   char *outputFile = NULL;
   char *inputFile = NULL;
+
   const char usage[] = {
       "bmptool [-f | -r | -s | -v ] [-o output_file] [input_file]"};
 
@@ -201,7 +213,8 @@ int main(int argc, char *argv[]) {
   int nr = 0, nc = 0;
 
   // Define an array of bitmaps
-  PIXEL **bitmaps = malloc(sizeof(PIXEL) * 15);
+  PIXEL **bitmaps = (PIXEL **)malloc(9 * sizeof(PIXEL));
+
   int idx = 0; // keep track of index
 
   // Read from either stdin or input file passed
@@ -212,6 +225,7 @@ int main(int argc, char *argv[]) {
     printf("Enlarge\n");
 
     enlarge(bitmaps[idx], r, c, &bitmaps[idx + 1], &nr, &nc);
+
     // Update row/col
     r = nr;
     c = nc;
@@ -224,6 +238,7 @@ int main(int argc, char *argv[]) {
     printf("Rotate\n");
 
     rotate(bitmaps[idx], r, c, &bitmaps[idx + 1], &nr, &nc);
+
     // Update row/col
     r = nr;
     c = nc;
@@ -245,6 +260,7 @@ int main(int argc, char *argv[]) {
     printf("Horizontal Flip\n");
 
     flip(bitmaps[idx], &bitmaps[idx + 1], r, c);
+
     idx++;
   }
 
