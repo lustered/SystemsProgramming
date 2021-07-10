@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
   char *inputFile = NULL;
 
   const char usage[] = {
-      "bmptool [-f | -r | -s | -v ] [-o output_file] [input_file]"};
+      "bmptool [-f | -r | -s | -v ] [-o output_file] [input_file]\n"};
 
   // Check for parameter flags
   while ((opt = getopt(argc, argv, "frsvo:")) != -1) {
@@ -194,7 +194,6 @@ int main(int argc, char *argv[]) {
       outputFile = optarg;
       break;
     case '?':
-      break;
     default:
       fprintf(stderr, usage);
       exit(1);
@@ -205,6 +204,10 @@ int main(int argc, char *argv[]) {
   if (argc > optind) {
     if (access(argv[argc - 1], F_OK) == 0) // Check the file exists
       inputFile = argv[argc - 1];
+    else { // Input file does not exist
+      fprintf(stderr, "Input file does not exist.\n%s", usage);
+      exit(1);
+    }
   }
 
   // Define row, col
@@ -212,8 +215,7 @@ int main(int argc, char *argv[]) {
   // Define newrow, newcol
   int nr = 0, nc = 0;
 
-  // Define an array of bitmaps
-  PIXEL *bitmaps[5];
+  PIXEL *bitmaps[5]; // Define an array of bitmaps
 
   int idx = 0; // keep track of index
 
