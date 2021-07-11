@@ -1,3 +1,27 @@
+/* Name: Carlos Luis
+ * Panther ID: 6271656
+ *
+ * I affirm that I wrote this program myself without any help from any other
+ * people or sources from the internet.
+ */
+
+/*
+ * This program will transform 24-bit uncompressed .bmp files. The possible
+ * transformation options are:
+ *
+ *   - [-s] Enlarge (resize) image by a factor of 2.
+ *   - [-r] Rotate 90 degrees clockwise.
+ *   - [-v] Flip the image vertically.
+ *   - [-f] Flip the image horizontally.
+ *
+ * Usage: bmptool [-f | -r | -s | -v ] [-o output_file] [input_file]
+ *
+ * It is also possible to chain commands using pipes such as:
+ *
+ * bmptool -s -r example.bmp | bmptool -v -o ret_image
+ *
+ */
+
 #include "bmplib.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,11 +62,11 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
     // Grab a pointer to original's pixel i, j
     PIXEL *o = original + (i / cols) * cols + (i % cols);
 
-    // Grab the pixel at the corresponding position in the new photo
+    // Grab the pixel at the corresponding position in the new image
     PIXEL *n =
         *new + (*newrows - (i % *newrows) - 1) * *newcols + (i / *newrows);
 
-    // Copy the original's pixel to the new photo
+    // Copy the original's pixel to the new image
     *n = *o;
   }
 
@@ -106,10 +130,10 @@ int verticalflip(PIXEL *original, PIXEL **new, int rows, int cols) {
     // Grab a pointer to original's pixel i, j
     PIXEL *o = original + (i / cols) * cols + (i % cols);
 
-    // Grab the pixel at the corresponding position in the new photo
-    PIXEL *n = (*new) + (rows - 1 - (i / cols)) * cols + (i % cols) - 1;
+    // Grab the pixel at the corresponding position in the new image
+    PIXEL *n = (*new) + (rows - 1 - (i / cols)) * cols + (i % cols);
 
-    // Copy the original's pixel to the new photo
+    // Copy the original's pixel to the new image
     *n = *o;
   }
 
@@ -134,30 +158,26 @@ int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
   if ((rows <= 0) || (cols <= 0))
     return -1;
 
-  // Fixed scale factor
-  int scale = 2;
-
   // Declare new rows and cols
-  *newrows = rows * scale;
-  *newcols = cols * scale;
+  *newrows = rows * 2;
+  *newcols = cols * 2;
 
   // Allocate memory for the new bitmap
   *new = (PIXEL *)malloc((*newrows) * (*newcols) * sizeof(PIXEL));
 
   for (int i = 0; i < *newrows; i++) {
-    // Iterate throguh the rows of the original image
-    PIXEL *o = original + (i / scale) * cols;
+    // Iterate through the rows of the original image
+    PIXEL *o = original + (i / 2) * cols;
     // Grab a pointer to its respective column in the new image
     PIXEL *n = *new + (i * *newcols);
 
     /* Write each column(scaled) to the new bitmap.
      *
      * We can see the process if we half cols in the following for loop,
-     * and only half of the image will be written vertically.
+     * and only half of the image's columns will be seen.
      */
-    for (int x = 0; x < cols; x++, o++)
-      for (int y = 0; y < scale; y++)
-        *n++ = *o;
+    for (int y = 0; y < cols; y++, o++)
+      *n++ = *o, *n++ = *o;
   }
 
   return 0;
@@ -224,8 +244,6 @@ int main(int argc, char *argv[]) {
 
   // Enlarge bmp image by factor of 2
   if (sflag) {
-    printf("Enlarge\n");
-
     enlarge(bitmaps[idx], r, c, &bitmaps[idx + 1], &nr, &nc);
 
     // Update row/col
@@ -237,8 +255,6 @@ int main(int argc, char *argv[]) {
 
   // Rotate image 90 degrees clockwise
   if (rflag) {
-    printf("Rotate\n");
-
     rotate(bitmaps[idx], r, c, &bitmaps[idx + 1], &nr, &nc);
 
     // Update row/col
@@ -250,8 +266,6 @@ int main(int argc, char *argv[]) {
 
   // Flip image vertically
   if (vflag) {
-    printf("Vertical Flip\n");
-
     verticalflip(bitmaps[idx], &bitmaps[idx + 1], r, c);
 
     idx++;
@@ -259,8 +273,6 @@ int main(int argc, char *argv[]) {
 
   // Flip image horizontally
   if (fflag) {
-    printf("Horizontal Flip\n");
-
     flip(bitmaps[idx], &bitmaps[idx + 1], r, c);
 
     idx++;
