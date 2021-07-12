@@ -189,6 +189,9 @@ int main(int argc, char *argv[]) {
   char *outputFile = NULL;
   char *inputFile = NULL;
 
+  // Keep track of how many bitmaps will be created.
+  int bitmapcount = 1;
+
   const char usage[] = {
       "bmptool [-f | -r | -s | -v ] [-o output_file] [input_file]\n"};
 
@@ -197,15 +200,27 @@ int main(int argc, char *argv[]) {
     // Check param.
     switch (opt) {
     case 'f': // Flip horizontally
+      // Increase flag count if it's the first time it's being passed
+      if (!fflag)
+        bitmapcount++;
       fflag = 1;
       break;
     case 'r': // Rotate 90 degrees clockwise
+      // Increase flag count if it's the first time it's being passed
+      if (!rflag)
+        bitmapcount++;
       rflag = 1;
       break;
     case 's': // Scale by factor of 2
+      // Increase flag count if it's the first time it's being passed
+      if (!sflag)
+        bitmapcount++;
       sflag = 1;
       break;
     case 'v': // Vertical flip
+      // Increase flag count if it's the first time it's being passed
+      if (!vflag)
+        bitmapcount++;
       vflag = 1;
       break;
     case 'o': // Specified output file flag
@@ -280,9 +295,8 @@ int main(int argc, char *argv[]) {
   writeFile(outputFile, r, c, bitmaps[idx]);
 
   // Free up allocated memory
-  for (int i = 0; i < 5; i++)
-    if (bitmaps[i] != NULL)
-      free(bitmaps[i]);
+  for (int i = 0; i < bitmapcount; i++)
+    free(bitmaps[i]);
 
   return 0;
 }
