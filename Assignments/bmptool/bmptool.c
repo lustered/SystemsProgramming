@@ -25,8 +25,51 @@
 #include "bmplib.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
+
+/*
+ * This method enlarges a 24-bit, uncompressed .bmp file
+ * that has been read in using readFile()
+ *
+ * original - an array containing the original PIXELs, 3 bytes per each
+ * rows     - the original number of rows
+ * cols     - the original number of columns
+ *
+ * new      - the new array containing the PIXELs, allocated within
+ * newrows  - the new number of rows (scale*rows)
+ * newcols  - the new number of cols (scale*cols)
+ */
+int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
+            int *newcols) {
+
+  if ((rows <= 0) || (cols <= 0))
+    return -1;
+
+  // Declare new rows and cols
+  *newrows = rows * 2;
+  *newcols = cols * 2;
+
+  // Allocate memory for the new bitmap
+  *new = (PIXEL *)malloc((*newrows) * (*newcols) * sizeof(PIXEL));
+
+  for (int i = 0; i < *newrows; i++) {
+    // Iterate through the rows of the original image
+    PIXEL *o = original + (i / 2) * cols;
+    // Grab a pointer to its respective column in the new image
+    PIXEL *n = *new + (i * *newcols);
+
+    /* Write each column(scaled) to the new bitmap.
+     *
+     * We can see the process if we half cols in the following for loop,
+     * and only half of the image's columns will be seen.
+     */
+    for (int y = 0; y < cols; y++, o++)
+      *n++ = *o, *n++ = *o;
+  }
+
+  return 0;
+}
 
 /*
  * This method rotates a 24-bit, uncompressed .bmp file 90 degrees clockwise
@@ -83,6 +126,30 @@ int rotate(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
  *
  * new      - the new array containing the PIXELs, allocated within
  */
+int verticalflip(PIXEL *original, PIXEL **new, int rows, int cols) {
+  if ((rows <= 0) || (cols <= 0))
+    return -1;
+
+  // Allocate memory for the new bitmap
+  *new = (PIXEL *)malloc(rows * cols * sizeof(PIXEL));
+
+  /* Using a single loop, keep in mind:
+   * row = i / cols;
+   * col = i % cols;
+   */
+  for (int i = 0; i < rows * cols; i++) {
+    // Grab a pointer to original's pixel i, j
+    PIXEL *o = original + (i / cols) * cols + (i % cols);
+
+    // Grab the pixel at the corresponding position in the new image
+    PIXEL *n = (*new) + (rows - 1 - (i / cols)) * cols + (i % cols);
+
+    // Copy the original's pixel to the new image
+    *n = *o;
+  }
+
+  return 0;
+}
 
 /*
  * This method horizontally flips a 24-bit, uncompressed bmp file
@@ -111,74 +178,6 @@ int flip(PIXEL *original, PIXEL **new, int rows, int cols) {
       PIXEL *n = (*new) + row * cols + (cols - 1 - col);
       *n = *o;
     }
-
-  return 0;
-}
-
-int verticalflip(PIXEL *original, PIXEL **new, int rows, int cols) {
-  if ((rows <= 0) || (cols <= 0))
-    return -1;
-
-  // Allocate memory for the new bitmap
-  *new = (PIXEL *)malloc(rows * cols * sizeof(PIXEL));
-
-  /* Using a single loop, keep in mind:
-   * row = i / cols;
-   * col = i % cols;
-   */
-  for (int i = 0; i < rows * cols; i++) {
-    // Grab a pointer to original's pixel i, j
-    PIXEL *o = original + (i / cols) * cols + (i % cols);
-
-    // Grab the pixel at the corresponding position in the new image
-    PIXEL *n = (*new) + (rows - 1 - (i / cols)) * cols + (i % cols);
-
-    // Copy the original's pixel to the new image
-    *n = *o;
-  }
-
-  return 0;
-}
-
-/*
- * This method enlarges a 24-bit, uncompressed .bmp file
- * that has been read in using readFile()
- *
- * original - an array containing the original PIXELs, 3 bytes per each
- * rows     - the original number of rows
- * cols     - the original number of columns
- *
- * new      - the new array containing the PIXELs, allocated within
- * newrows  - the new number of rows (scale*rows)
- * newcols  - the new number of cols (scale*cols)
- */
-int enlarge(PIXEL *original, int rows, int cols, PIXEL **new, int *newrows,
-            int *newcols) {
-
-  if ((rows <= 0) || (cols <= 0))
-    return -1;
-
-  // Declare new rows and cols
-  *newrows = rows * 2;
-  *newcols = cols * 2;
-
-  // Allocate memory for the new bitmap
-  *new = (PIXEL *)malloc((*newrows) * (*newcols) * sizeof(PIXEL));
-
-  for (int i = 0; i < *newrows; i++) {
-    // Iterate through the rows of the original image
-    PIXEL *o = original + (i / 2) * cols;
-    // Grab a pointer to its respective column in the new image
-    PIXEL *n = *new + (i * *newcols);
-
-    /* Write each column(scaled) to the new bitmap.
-     *
-     * We can see the process if we half cols in the following for loop,
-     * and only half of the image's columns will be seen.
-     */
-    for (int y = 0; y < cols; y++, o++)
-      *n++ = *o, *n++ = *o;
-  }
 
   return 0;
 }
