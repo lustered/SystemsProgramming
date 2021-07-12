@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 
 /*
  * This method enlarges a 24-bit, uncompressed .bmp file
