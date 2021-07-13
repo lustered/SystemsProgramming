@@ -9,7 +9,9 @@
  * unix command equivalent: sort counter.c | grep main | wc
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #define FD_READ 0
@@ -38,7 +40,13 @@ int main() {
     execlp(commands[0][0], commands[0][1], commands[0][2], NULL);
 
     exit(1); // Close process.
+  } else if (pid == -1) {
+    fprintf(stderr, "Error forking first process");
+    exit(1);
   }
+
+  // Wait for process to finish
+  wait(NULL);
 
   // Don't need to write to this pipe anymore.
   close(sortPipe[FD_WRITE]);
@@ -48,7 +56,7 @@ int main() {
 
   // Get stdout from sort and grep main
   if ((pid = fork()) == 0) {
-    // Don't need to read 
+    // Don't need to read
     close(grepPipe[FD_READ]);
 
     // Read from the sort pipe
@@ -61,7 +69,13 @@ int main() {
     execlp(commands[1][0], commands[1][1], commands[1][2], NULL);
 
     exit(1); // Close process
+  } else if (pid == -1) {
+    fprintf(stderr, "Error forking second process");
+    exit(1);
   }
+
+  // Wait for process to finish
+  wait(NULL);
 
   // Don't need to use these pipes anymore
   close(sortPipe[FD_READ]);
@@ -76,7 +90,13 @@ int main() {
     execlp(commands[2][0], commands[2][1], commands[2][2], NULL);
 
     exit(1); // Close process.
+  } else if (pid == -1) {
+    fprintf(stderr, "Error forking third process");
+    exit(1);
   }
+
+  // Wait for process to finish
+  wait(NULL);
 
   // We are done reading contents
   close(grepPipe[FD_READ]);
