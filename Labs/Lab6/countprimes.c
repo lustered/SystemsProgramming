@@ -32,8 +32,7 @@ int isPrime(int num) {
 }
 
 int main(int argc, char *argv[]) {
-  // Define iter count, process rank and No. processes
-  int i, id, pNo;
+  int i, id, pNo;            // iter, process rank and No. processes
   double elapsed_time = 0;   // Calculate local execution time
   double total_elapsed_time; // Calculate total execution time
   int count = 0;             // Local primes count
