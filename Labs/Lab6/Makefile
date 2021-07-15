@@ -1,5 +1,5 @@
 CC=mpicc
-FLAGS=-O
+FLAGS=-O -lm
 
 countprimes: countprimes.c
 	$(CC) $(FLAGS) -o $@ $^
@@ -9,4 +9,4 @@ test: countprimes
 	mpirun -np 0 ./countprimes
 
 clean:
-	rm -r countprimes
+	rm -f countprimes
