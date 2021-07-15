@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     elapsed_time = -MPI_Wtime();
 
     // Calculate primes
-    for (i = min; i < max; i++)
+    for (i = min; i <= max; i++)
       count += isPrime(i);
 
     elapsed_time += MPI_Wtime();
