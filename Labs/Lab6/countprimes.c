@@ -11,6 +11,7 @@
  * calculations. The total execution time is shown by the master process.
  */
 
+#include <math.h>
 #include <mpi.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -19,15 +20,20 @@
 #define RANGE 1000000
 
 int isPrime(int num) {
-  // Check if num < 2 or even
+  // Check if num < 2 or even but greater than 2
   if (num <= 1 || (num % 2 == 0 && num > 2))
     return 0;
 
+  // 2 is a prime
+  if (num == 2)
+    return 1;
+
   // Check the number against its possible primes
-  for (int i = 3; i < num / 2; i += 2)
+  for (int i = 3; i <= (int)floor(sqrt(num)); i++)
     if (num % i == 0)
       return 0;
 
+  // printf("Prime: %d\n", num);
   return 1;
 }
 
@@ -50,8 +56,10 @@ int main(int argc, char *argv[]) {
 
   if (id != 0) {
     // Calculate each process' load
-    int chunk = RANGE / pNo;
-    min = (id == 1) ? 2 : chunk * (id - 1);
+    int chunk = RANGE / (pNo - 1);
+
+    // Calculate the min and max range for each process
+    min = chunk * (id - 1);
     max = (id == pNo - 1) ? RANGE : id * chunk - 1;
 
     // ********************* START calculating time *********************
@@ -64,8 +72,13 @@ int main(int argc, char *argv[]) {
     elapsed_time += MPI_Wtime();
     // ********************* STOP calculating time *********************
 
-    printf("[%d][%s] Found %d primes between: ", id, hostname, count);
-    printf("[%d - %d] in %8.6f seconds\n", min, max, elapsed_time);
+    // Full verbose output [Process][Host] [Count] [min-max] [Time]
+    printf("[%d][%s] Found %d primes between: [%d - %d] in %8.6f seconds\n", id,
+           hostname, count, min, max, elapsed_time);
+
+    // Simple output [Process][Host] [Count]
+    // printf("[%d][%s] Found %d primes.\n", id, hostname, count);
+
     fflush(stdout);
   }
 
@@ -78,6 +91,7 @@ int main(int argc, char *argv[]) {
 
   MPI_Finalize();
 
+  // Print the total solutions and execution time from master
   if (!id) {
     printf("There are %d different solutions\n", totalprimes);
     printf("Execution time %8.6f\n", total_elapsed_time);
