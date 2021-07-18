@@ -24,12 +24,8 @@ int isPrime(int num) {
   if (num <= 1 || (num % 2 == 0 && num > 2))
     return 0;
 
-  // 2 is a prime
-  if (num == 2)
-    return 1;
-
-  // Check the number against its possible primes
-  for (int i = 3; i <= (int)floor(sqrt(num)); i++)
+  // Check if the number is prime
+  for (int i = 2; i <= (int)floor(sqrt(num)); i++)
     if (num % i == 0)
       return 0;
 
@@ -73,11 +69,11 @@ int main(int argc, char *argv[]) {
     // ********************* STOP calculating time *********************
 
     // Full verbose output [Process][Host] [Count] [min-max] [Time]
-    printf("[%d][%s] Found %d primes between: [%d - %d] in %8.6f seconds\n", id,
-           hostname, count, min, max, elapsed_time);
+    // printf("[%d][%s] Found %d primes between: [%d - %d] in %8.6f seconds\n", id,
+    //        hostname, count, min, max, elapsed_time);
 
     // Simple output [Process][Host] [Count]
-    // printf("[%d][%s] Found %d primes.\n", id, hostname, count);
+    printf("[%d][%s] Found %d primes.\n", id, hostname, count);
 
     fflush(stdout);
   }
@@ -93,8 +89,8 @@ int main(int argc, char *argv[]) {
 
   // Print the total solutions and execution time from master
   if (!id) {
-    printf("There are %d different solutions\n", totalprimes);
-    printf("Execution time %8.6f\n", total_elapsed_time);
+    printf("\n[%d][%s]There are %d different solutions\n", id, hostname, totalprimes);
+    printf("[%d][%s]Execution time %8.6f\n", id, hostname, total_elapsed_time);
     fflush(stdout);
   }
 
