@@ -24,7 +24,7 @@ int isPrime(int num) {
   if (num <= 1 || (num % 2 == 0 && num > 2))
     return 0;
 
-  // Check if the number is prime
+  // Check if the number is prime, only up to its square root
   for (int i = 2; i <= (int)floor(sqrt(num)); i++)
     if (num % i == 0)
       return 0;
@@ -50,33 +50,35 @@ int main(int argc, char *argv[]) {
   hostname[1023] = '\0';
   gethostname(hostname, 1023);
 
-  if (id != 0) {
-    // Calculate each process' load
-    int chunk = RANGE / (pNo - 1);
+  // Calculate each process' load
+  int chunk = RANGE / (pNo);
 
-    // Calculate the min and max range for each process
-    min = chunk * (id - 1);
-    max = (id == pNo - 1) ? RANGE : id * chunk - 1;
+  // Calculate the min and max range for each process
+  // Check for special cases 0, 1 and the rest
+  min = (id == 0) ? 0 : (id == 1) ? chunk : chunk * (id);
+  // Check for special cases 0, 1 and up to np - 1
+  max = (id == 0) ? chunk - 1 : (id + 1) * chunk - 1;
+  // Check for the last process
+  max = (id == pNo - 1) ? RANGE : max;
 
-    // ********************* START calculating time *********************
-    elapsed_time = -MPI_Wtime();
+  // ********************* START calculating time *********************
+  elapsed_time = -MPI_Wtime();
 
-    // Calculate primes
-    for (i = min; i <= max; i++)
-      count += isPrime(i);
+  // Calculate primes
+  for (i = min; i <= max; i++)
+    count += isPrime(i);
 
-    elapsed_time += MPI_Wtime();
-    // ********************* STOP calculating time *********************
+  elapsed_time += MPI_Wtime();
+  // ********************* STOP calculating time *********************
 
-    // Full verbose output [Process][Host] [Count] [min-max] [Time]
-    // printf("[%d][%s] Found %d primes between: [%d - %d] in %8.6f seconds\n", id,
-    //        hostname, count, min, max, elapsed_time);
+  // Full verbose output [Process][Host] [Count] [min-max] [Time]
+  // printf("[%d][%s] Found %d primes between: [%d - %d] in %8.6f seconds\n", id,
+  //        hostname, count, min, max, elapsed_time);
 
-    // Simple output [Process][Host] [Count]
-    printf("[%d][%s] Found %d primes.\n", id, hostname, count);
+  // Simple output [Process][Host] [Count]
+  printf("[%d][%s] Found %d primes.\n", id, hostname, count);
 
-    fflush(stdout);
-  }
+  fflush(stdout);
 
   // Add count to totalprimes in master
   MPI_Reduce(&count, &totalprimes, 1, MPI_INT, MPI_SUM, MASTER, MPI_COMM_WORLD);
@@ -89,7 +91,8 @@ int main(int argc, char *argv[]) {
 
   // Print the total solutions and execution time from master
   if (!id) {
-    printf("\n[%d][%s]There are %d different solutions\n", id, hostname, totalprimes);
+    printf("\n[%d][%s]There are %d different solutions\n", id, hostname,
+           totalprimes);
     printf("[%d][%s]Execution time %8.6f\n", id, hostname, total_elapsed_time);
     fflush(stdout);
   }
