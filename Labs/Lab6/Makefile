@@ -1,5 +1,5 @@
 CC=mpicc
-FLAGS=-O -lm
+FLAGS=-O -Wall -lm
 
 countprimes: countprimes.c
 	$(CC) $(FLAGS) -o $@ $^
