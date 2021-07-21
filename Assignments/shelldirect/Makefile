@@ -5,4 +5,4 @@ test: myshell
 	./$^
 
 clean:
-	rm -f myshell
+	rm -f myshell ret
