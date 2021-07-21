@@ -20,7 +20,7 @@
 #define BUFSIZE 1024
 #define FDR 0
 #define FDW 1
-#define WRITEMODE(mode) (mode == 1 ? O_APPEND : O_TRUNC)
+#define WRITEMODE(mode) (mode == 1 ? O_APPEND : mode == 2 ? 0 : O_TRUNC)
 
 int get_args(char *cmdline, char *args[]) {
   int i = 0;
@@ -69,11 +69,12 @@ void execute(char *cmdline) {
     int rf = 0; // Flag for redirect found
 
     // Check for >> and >
-    if (!strcmp(args[i], ">>") || !strcmp(args[i], ">") && !rf) {
+    if (!strcmp(args[i], ">>") || !strcmp(args[i], ">") ||
+        !strcmp(args[i], "<") && !rf) {
       rf = 1;
 
-      // Use O_APPEND for >> and O_TRUNC for >
-      mode = (!strcmp(args[i], ">>") ? 1 : 0);
+      // Use O_APPEND for >> and O_TRUNC for >, 0 for <
+      mode = (!strcmp(args[i], ">>") ? 1 : !strcmp(args[i], "<") ? 2 : 0);
 
       // printf("[caught redirect]\n");
       // Check for the file
@@ -85,6 +86,9 @@ void execute(char *cmdline) {
         newcmd = concatcmd(args, 0, i);
         nargs = get_args(newcmd, args);
       }
+      else {
+      fprintf(stderr, "Provide a file when using redirects.\n");
+      }
     }
   }
 
@@ -92,8 +96,21 @@ void execute(char *cmdline) {
   // child process
   if (pid == 0) {
     if (iofile != NULL) {
-      int fd = open(iofile, O_RDWR | O_CREAT | WRITEMODE(mode), S_IRUSR | S_IWUSR);
-      dup2(fd, FDW);
+      int fd =
+          open(iofile, O_RDWR | O_CREAT | WRITEMODE(mode), S_IRUSR | S_IWUSR);
+
+      switch (mode) {
+      case 0:
+      case 1:
+        dup2(fd, FDW);
+        break;
+      case 2:
+        dup2(fd, FDR);
+        break;
+      default:
+        break;
+      }
+
       close(fd);
     }
 
