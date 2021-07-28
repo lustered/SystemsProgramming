@@ -1,13 +1,5 @@
-/* Name: Carlos Luis
- * Panther ID: 6271656
- *
- * I affirm that I wrote this program myself without any help from any other
- * people or sources from the internet.
- */
-
-/*
- * [DESCRIPTION]
- */
+/* This example is stolen from Dr. Raju Rangaswami's original 4338
+   demo and modified to fit into our lecture. */
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -18,14 +10,13 @@
 
 #define MAX_ARGS 20
 #define BUFSIZE 1024
-#define FDR 0
-#define FDW 1
-#define WRITEMODE(mode) (mode == 1 ? O_APPEND : mode == 2 ? 0 : O_TRUNC)
+
+#define WRITEMODE(param) (!strcmp(param, ">") ? O_TRUNC : O_APPEND)
 
 int get_args(char *cmdline, char *args[]) {
   int i = 0;
 
-  // if no args
+  /* if no args */
   if ((args[0] = strtok(cmdline, "\n\t ")) == NULL)
     return 0;
 
@@ -39,92 +30,82 @@ int get_args(char *cmdline, char *args[]) {
   return i;
 }
 
-char *concatcmd(char *args[], int start, int end) {
-  // Return a single string from an array of strings in a range
-  if (end <= start) {
-    fprintf(stderr, "Wrong range\n");
-    exit(1);
-  }
-
-  char *ret = malloc((end - start) * 20);
-  for (int i = start; i < end; i++)
-    strncat(strncat(ret, args[i], sizeof(args[i]) + 1), " ", 2);
-
-  return ret;
-}
-
 void execute(char *cmdline) {
-  int pid, async = 0;
-  char *newcmd = NULL;
-  char *iofile = NULL;
+  int pid, async;
   char *args[MAX_ARGS];
-  int mode;
+  // This array will contain the stripped down commands for execvp
+  char *arg_chunk[MAX_ARGS];
+  int limitindex = 0;
+  int fdin, fdout;
 
   int nargs = get_args(cmdline, args);
-
   if (nargs <= 0)
     return;
 
-  for (int i = 0; i < nargs; i++) {
-    int rf = 0; // Flag for redirect found
-
-    // Check for >> and >
-    if (!strcmp(args[i], ">>") || !strcmp(args[i], ">") ||
-        !strcmp(args[i], "<") && !rf) {
-      rf = 1;
-
-      // Use O_APPEND for >> and O_TRUNC for >, 0 for <
-      mode = (!strcmp(args[i], ">>") ? 1 : !strcmp(args[i], "<") ? 2 : 0);
-
-      // printf("[caught redirect]\n");
-      // Check for the file
-      if (i < nargs - 1) {
-        // Grab file to redirect to
-        iofile = args[i + 1];
-
-        // Adjust the command to properly be executed
-        newcmd = concatcmd(args, 0, i);
-        nargs = get_args(newcmd, args);
-      }
-      else {
-      fprintf(stderr, "Provide a file when using redirects.\n");
-      }
-    }
+  if (!strcmp(args[0], "quit") || !strcmp(args[0], "exit")) {
+    exit(0);
   }
 
-  pid = fork();
-  // child process
-  if (pid == 0) {
-    if (iofile != NULL) {
-      int fd =
-          open(iofile, O_RDWR | O_CREAT | WRITEMODE(mode), S_IRUSR | S_IWUSR);
+  /* check if async call */
+  if (!strcmp(args[nargs - 1], "&")) {
+    async = 1;
+    args[--nargs] = 0;
+  } else
+    async = 0;
 
-      switch (mode) {
-      case 0:
-      case 1:
-        dup2(fd, FDW);
-        break;
-      case 2:
-        dup2(fd, FDR);
-        break;
-      default:
-        break;
+  pid = fork();
+  if (pid == 0) { /* child process */
+
+    for (int i = 0; i < nargs; i++) {
+      int replaced = 0;
+
+      if (!replaced) {
+        // Check for stdin
+        if (!strcmp(args[i], "<")) {
+          replaced++;
+          i++;
+
+          // Check if the file descriptor to read from works
+          if ((fdin = open(args[i], O_RDONLY)) < 0)
+            fprintf(stderr, "Cannot read from input\n");
+
+          dup2(fdin, STDIN_FILENO); // duplicate stdin to input file
+          close(fdin);              // close after use
+        }
+
+        if (!strcmp(args[i], ">") || !strcmp(args[i], ">>")) {
+          replaced++;
+          i++;
+
+          // Open the file descriptor. It will create it if doesn't exist. It
+          // will use O_TRUNC if the redirect is '>' and O_APPEND for '>>'
+          int fdout =
+              open(args[i], O_RDWR | O_CREAT | WRITEMODE(args[i - 1]), 0644);
+
+          // Connect stdout to descriptor
+          dup2(fdout, STDOUT_FILENO);
+          close(fdout);
+        }
       }
 
-      close(fd);
+      if (!replaced)
+        arg_chunk[limitindex++] = args[i];
     }
 
-    execvp(args[0], args);
+    arg_chunk[limitindex] = NULL; // Remove the uneccessary cmd
 
-    // return only when exec fails
+    // execute command: {"echo", "echo", "text"}
+    execvp(arg_chunk[0], arg_chunk);
+
+    /* return only when exec fails */
     perror("exec failed");
     exit(-1);
-  } else if (pid > 0) { // parent process
+  } else if (pid > 0) { /* parent process */
     if (!async)
       waitpid(pid, NULL, 0);
     else
       printf("this is an async call\n");
-  } else { // error occurred
+  } else { /* error occurred */
     perror("fork failed");
     exit(1);
   }
@@ -143,13 +124,3 @@ int main(int argc, char *argv[]) {
   }
   return 0;
 }
-
-/*
-if(!strcmp(args[0], "quit") || !strcmp(args[0], "exit")) {
-  exit(0);
-}
-
-// check if async call
-if(!strcmp(args[nargs-1], "&")) { async = 1; args[--nargs] = 0; }
-else async = 0;
-*/
