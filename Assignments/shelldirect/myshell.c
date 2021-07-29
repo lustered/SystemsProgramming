@@ -48,9 +48,10 @@ void execute(char *cmdline) {
   int pid, async;
   char *args[MAX_ARGS];
   // This array will contain the stripped down commands for execvp
-  char *arg_chunk[MAX_ARGS];
   int limitindex = 0;
   int fdin, fdout;
+
+  char *parsedcmd[5][MAX_ARGS]; // up to 5 commands of 20 args each
   int pipecount = 0;
 
   int nargs = get_args(cmdline, args);
@@ -70,91 +71,105 @@ void execute(char *cmdline) {
 
   // /*******************************************************
   // Split piped command
-  for (int i = 0; i < nargs; i++) {
+  int j = 0;
+  int cmd = 0;
+  int pipeargs[5] = {0};
+  for (int i = 0; i < nargs; i++, cmd++) {
     if (!strcmp(args[i], "|")) {
+      j++;
+      i++;
+      cmd = 0;
       pipecount++;
-      while (--nargs > i) {
-        args[i] = NULL;
-      }
     }
+    pipeargs[j]++;
+    parsedcmd[j][cmd] = args[i];
   }
 
-  if (pipecount) {
-    for (int i = 0; i < nargs; i++) {
-      printf("%s ", args[i]);
-    }
-    putchar('\n');
-  }
+  // for (int i = 0; i <= pipecount; i++) {
+  //   for (int j = 0; j < pipeargs[i]; j++)
+  //     printf("%s ", parsedcmd[i][j]);
+  //   putchar('\n');
+  // }
   // ******************************************************/
 
-  int pipefd[2];
-  pipe(pipefd);
-  pid = fork();
-  if (pid == 0) { /* child process */
+  char **arrptr;
+  for (int pidx = 0; pidx <= pipecount; pidx++) {
+    char *arg_chunk[MAX_ARGS];
+    arrptr = parsedcmd[pidx];
+    // printf("arg1: %s  arg2: %s\n", arrptr[0], arrptr[1]);
 
-    for (int i = 0; i < nargs; i++) {
-      int replaced = 0;
+    int pipefd[2];
+    pipe(pipefd);
+    pid = fork();
 
-      if (!replaced) {
-        // Check for stdin
-        if (!strcmp(args[i], "<")) {
-          replaced++;
-          i++;
+    if (pid == 0) { // child process
 
-          // Check if the file descriptor to read from works
-          if ((fdin = open(args[i], O_RDONLY)) < 0)
-            fprintf(stderr, "Cannot read from input\n");
+      for (int i = 0; i < pipeargs[pidx]; i++) {
+        int replaced = 0;
 
-          dup2(fdin, STDIN_FILENO); // duplicate stdin to input file
-          close(fdin);              // close after use
+        if (!replaced) {
+          // Check for stdin
+          if (!strcmp(arrptr[i], "<")) {
+            replaced++;
+            i++;
+
+            // Check if the file descriptor to read from works
+            if ((fdin = open(arrptr[i], O_RDONLY)) < 0)
+              fprintf(stderr, "Cannot read from input\n");
+
+            dup2(fdin, STDIN_FILENO); // duplicate stdin to input file
+            close(fdin);              // close after use
+          }
+
+          if (!strcmp(arrptr[i], ">") ||
+              !strcmp(arrptr[i], ">>")) {
+            replaced++;
+            i++;
+
+            // Open the file descriptor. It will create it if doesn't exist. It
+            // will use O_TRUNC if the redirect is '>' and O_APPEND for '>>'
+            int fdout = open(
+                arrptr[i],
+                O_RDWR | O_CREAT | WRITEMODE(arrptr[i - 1]), 0644);
+
+            // Connect stdout to descriptor
+            dup2(fdout, STDOUT_FILENO);
+            close(fdout);
+          }
+
+          // if (!strcmp(args[i], "|")) {
+          //   replaced++;
+          //   i++;
+          //   close(pipefd[0]);
+          //   dup2(pipefd[1], 1);
+          //   dup2(pipefd[1], 2);
+          //   close(pipefd[1]);
+          // }
         }
 
-        if (!strcmp(args[i], ">") || !strcmp(args[i], ">>")) {
-          replaced++;
-          i++;
-
-          // Open the file descriptor. It will create it if doesn't exist. It
-          // will use O_TRUNC if the redirect is '>' and O_APPEND for '>>'
-          int fdout =
-              open(args[i], O_RDWR | O_CREAT | WRITEMODE(args[i - 1]), 0644);
-
-          // Connect stdout to descriptor
-          dup2(fdout, STDOUT_FILENO);
-          close(fdout);
-        }
-
-        if (!strcmp(args[i], "|")) {
-          replaced++;
-          i++;
-          close(pipefd[0]);
-          dup2(pipefd[1], 1);
-          dup2(pipefd[1], 2);
-          close(pipefd[1]);
+        if (!replaced){
+          arg_chunk[limitindex++] = arrptr[i];
         }
       }
 
-      if (!replaced)
-        arg_chunk[limitindex++] = args[i];
+      // Set last command delimiter
+      arg_chunk[limitindex] = NULL;
+
+      execvp(arg_chunk[0], arg_chunk);
+
+      // return only when exec fails
+      perror("exec failed");
+      exit(-1);
+    } else if (pid > 0) { // parent process
+      if (!async) {
+        waitpid(pid, NULL, 0);
+
+      } else
+        printf("this is an async call\n");
+    } else { // error occurred
+      perror("fork failed");
+      exit(1);
     }
-
-    // Set last command delimiter
-    arg_chunk[limitindex] = NULL;
-
-    execvp(arg_chunk[0], arg_chunk);
-
-    // return only when exec fails
-    perror("exec failed");
-    exit(-1);
-  } else if (pid > 0) { // parent process
-    if (!async){
-      waitpid(pid, NULL, 0);
-
-    }
-    else
-      printf("this is an async call\n");
-  } else { // error occurred
-    perror("fork failed");
-    exit(1);
   }
 }
 
