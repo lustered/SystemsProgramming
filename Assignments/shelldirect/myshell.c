@@ -30,20 +30,6 @@ int get_args(char *cmdline, char *args[]) {
   return i;
 }
 
-char *concatcmd(char *args[], int start, int end) {
-  // Return a single string from an array of strings in a range
-  if (end <= start) {
-    fprintf(stderr, "Wrong range\n");
-    exit(1);
-  }
-
-  char *ret = malloc((end - start) * 20);
-  for (int i = start; i < end; i++)
-    strncat(strncat(ret, args[i], sizeof(args[i]) + 1), " ", 2);
-
-  return ret;
-}
-
 void execute(char *cmdline) {
   int pid, async;
   char *args[MAX_ARGS];
@@ -69,7 +55,6 @@ void execute(char *cmdline) {
   } else
     async = 0;
 
-  // /*******************************************************
   // Split piped command
   int j = 0;
   int cmd = 0;
@@ -85,24 +70,29 @@ void execute(char *cmdline) {
     parsedcmd[j][cmd] = args[i];
   }
 
-  // for (int i = 0; i <= pipecount; i++) {
-  //   for (int j = 0; j < pipeargs[i]; j++)
-  //     printf("%s ", parsedcmd[i][j]);
-  //   putchar('\n');
-  // }
-  // ******************************************************/
-
+  int pipefd[2];
+  pipe(pipefd);
   char **arrptr;
-  for (int pidx = 0; pidx <= pipecount; pidx++) {
+  int tmpcnt = pipecount;
+
+  for (int pidx = 0; pidx <= pipecount; pidx++, tmpcnt--) {
     char *arg_chunk[MAX_ARGS];
     arrptr = parsedcmd[pidx];
     // printf("arg1: %s  arg2: %s\n", arrptr[0], arrptr[1]);
 
-    int pipefd[2];
-    pipe(pipefd);
     pid = fork();
 
     if (pid == 0) { // child process
+
+      if (tmpcnt == 1) {
+        close(pipefd[0]);
+        dup2(pipefd[1], 1);
+        close(pipefd[1]);
+      } else {
+        dup2(pipefd[0], 0);
+        close(pipefd[0]);
+        close(pipefd[1]);
+      }
 
       for (int i = 0; i < pipeargs[pidx]; i++) {
         int replaced = 0;
@@ -115,39 +105,28 @@ void execute(char *cmdline) {
 
             // Check if the file descriptor to read from works
             if ((fdin = open(arrptr[i], O_RDONLY)) < 0)
-              fprintf(stderr, "Cannot read from input\n");
+              fprintf(stderr, "Bad input file descriptor\n");
 
             dup2(fdin, STDIN_FILENO); // duplicate stdin to input file
             close(fdin);              // close after use
           }
 
-          if (!strcmp(arrptr[i], ">") ||
-              !strcmp(arrptr[i], ">>")) {
+          if (!strcmp(arrptr[i], ">") || !strcmp(arrptr[i], ">>")) {
             replaced++;
             i++;
 
             // Open the file descriptor. It will create it if doesn't exist. It
             // will use O_TRUNC if the redirect is '>' and O_APPEND for '>>'
-            int fdout = open(
-                arrptr[i],
-                O_RDWR | O_CREAT | WRITEMODE(arrptr[i - 1]), 0644);
+            int fdout = open(arrptr[i],
+                             O_RDWR | O_CREAT | WRITEMODE(arrptr[i - 1]), 0644);
 
             // Connect stdout to descriptor
             dup2(fdout, STDOUT_FILENO);
             close(fdout);
           }
-
-          // if (!strcmp(args[i], "|")) {
-          //   replaced++;
-          //   i++;
-          //   close(pipefd[0]);
-          //   dup2(pipefd[1], 1);
-          //   dup2(pipefd[1], 2);
-          //   close(pipefd[1]);
-          // }
         }
 
-        if (!replaced){
+        if (!replaced) {
           arg_chunk[limitindex++] = arrptr[i];
         }
       }
@@ -161,6 +140,8 @@ void execute(char *cmdline) {
       perror("exec failed");
       exit(-1);
     } else if (pid > 0) { // parent process
+      close(pipefd[1]);
+
       if (!async) {
         waitpid(pid, NULL, 0);
 
@@ -171,6 +152,7 @@ void execute(char *cmdline) {
       exit(1);
     }
   }
+  close(pipefd[0]);
 }
 
 int main(int argc, char *argv[]) {
