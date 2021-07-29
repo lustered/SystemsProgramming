@@ -30,6 +30,20 @@ int get_args(char *cmdline, char *args[]) {
   return i;
 }
 
+char *concatcmd(char *args[], int start, int end) {
+  // Return a single string from an array of strings in a range
+  if (end <= start) {
+    fprintf(stderr, "Wrong range\n");
+    exit(1);
+  }
+
+  char *ret = malloc((end - start) * 20);
+  for (int i = start; i < end; i++)
+    strncat(strncat(ret, args[i], sizeof(args[i]) + 1), " ", 2);
+
+  return ret;
+}
+
 void execute(char *cmdline) {
   int pid, async;
   char *args[MAX_ARGS];
@@ -37,6 +51,7 @@ void execute(char *cmdline) {
   char *arg_chunk[MAX_ARGS];
   int limitindex = 0;
   int fdin, fdout;
+  int pipecount = 0;
 
   int nargs = get_args(cmdline, args);
   if (nargs <= 0)
@@ -53,6 +68,27 @@ void execute(char *cmdline) {
   } else
     async = 0;
 
+  // /*******************************************************
+  // Split piped command
+  for (int i = 0; i < nargs; i++) {
+    if (!strcmp(args[i], "|")) {
+      pipecount++;
+      while (--nargs > i) {
+        args[i] = NULL;
+      }
+    }
+  }
+
+  if (pipecount) {
+    for (int i = 0; i < nargs; i++) {
+      printf("%s ", args[i]);
+    }
+    putchar('\n');
+  }
+  // ******************************************************/
+
+  int pipefd[2];
+  pipe(pipefd);
   pid = fork();
   if (pid == 0) { /* child process */
 
@@ -86,26 +122,37 @@ void execute(char *cmdline) {
           dup2(fdout, STDOUT_FILENO);
           close(fdout);
         }
+
+        if (!strcmp(args[i], "|")) {
+          replaced++;
+          i++;
+          close(pipefd[0]);
+          dup2(pipefd[1], 1);
+          dup2(pipefd[1], 2);
+          close(pipefd[1]);
+        }
       }
 
       if (!replaced)
         arg_chunk[limitindex++] = args[i];
     }
 
-    arg_chunk[limitindex] = NULL; // Remove the uneccessary cmd
+    // Set last command delimiter
+    arg_chunk[limitindex] = NULL;
 
-    // execute command: {"echo", "echo", "text"}
     execvp(arg_chunk[0], arg_chunk);
 
-    /* return only when exec fails */
+    // return only when exec fails
     perror("exec failed");
     exit(-1);
-  } else if (pid > 0) { /* parent process */
-    if (!async)
+  } else if (pid > 0) { // parent process
+    if (!async){
       waitpid(pid, NULL, 0);
+
+    }
     else
       printf("this is an async call\n");
-  } else { /* error occurred */
+  } else { // error occurred
     perror("fork failed");
     exit(1);
   }
